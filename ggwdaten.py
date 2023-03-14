@@ -34,6 +34,8 @@ F = np.array([-9.980797,-8.671914,-53.30667])
 G = np.array([172.707974,226.4168,203.8591])
 H = np.array([0.0,0.0,-45.89806])
 
+#Standardbildungsenthalpie delta_f_H_0_ref; NIST; [H2, N2, NH3]
+delta_f_H_0_ref = np.array([0.0, 0.0, -45.90]) # kJ mol^-1
 
 #Shomate-Gleichungen
 def shomate_S (T, stoff):
@@ -41,17 +43,23 @@ def shomate_S (T, stoff):
     S = A[stoff] * np.log(t) + B[stoff] * t + C[stoff] * t**2 / 2 + D[stoff] * t**3 / 3 - E[stoff] /(2 * t**2) + G[stoff]
     return S
 
+def shomate_H (T, stoff):
+    t = T / 1000
+    H_f = A[stoff] * t + B[stoff] * t**2 / 2 + C[stoff] * T**3 / 3 + D[stoff] * T**4 / 4 - E[stoff] / T + F[stoff] - H[stoff] + delta_f_H_0_ref[stoff] 
+    return H_f
+
 #Standardreaktionsenthalpie delta_R_H_0
-#delta_R_H_0 =
+delta_R_H_0 = v_H2 * shomate_H(T,H2) + v_N2 * shomate_H(T, N2) + v_NH3 * shomate_H(T,NH3) # kJ mol^-1
 
 #Standardreaktionsentropie delta_R_S_0
-delta_R_S_0 = v_H2 * shomate_S(T, H2) + v_N2 * shomate_S(T, N2) + v_NH3 * shomate_S(T, NH3)
+delta_R_S_0 = v_H2 * shomate_S(T, H2) + v_N2 * shomate_S(T, N2) + v_NH3 * shomate_S(T, NH3) # J mol^-1 K^-1
 
 #freie Standard Reaktionsenthalpie delta_R_G_0
-#delta_R_G_0 = delta_R_H_0 - T * delta_R_S_0 # J mol^-1
+delta_R_G_0 = delta_R_H_0 * 1000 - T * delta_R_S_0 # J mol^-1 # Umrechnung in J mol^-1
 
 #allgemeine GGW-Konstante K_0
-#K_0 = np.exp(-delta_R_G_0 / (R*T)) # 1
+#Achtung: hier Overflow! beheben!
+K_0 = np.exp(-delta_R_G_0 / (R*T)) # 1
 
 #spezifische GGW-Konstante K_x
-#K_x = K_0 * (p_0 / p)**(sum(v)) # 1 (Summe der stöchiometrischen Koeffizienten im Exponenten)
+K_x = K_0 * (p_0 / p)**(sum(v)) # 1 (Summe der stöchiometrischen Koeffizienten im Exponenten)
