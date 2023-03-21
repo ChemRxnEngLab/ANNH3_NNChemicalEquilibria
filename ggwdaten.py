@@ -16,16 +16,22 @@ H2 = index[0]
 N2 = index[1]
 NH3 = index[2]
 
-#
+#Konstanten
+R = 8.31448 # J mol^-1 K^-1 Ideale Gaskonstane
+p_0 = 1 # bar Standarddruck
+
+# Parameter
 T = 300 # K Temperatur
 #T = ([300, 350]) # K Temperatur
 p = 2 # bar Druck
-R = 8.31448 # J mol^-1 K^-1 Ideale Gaskonstane
-p_0 = 1 #bar Standarddruck
+
+n_H2 = 5 # mol Stoffmenge H2
+n_N2 = 1/3 * n_H2 # mol Stoffmenge N2 (stöchiometrisch)
+
 
 #Shomate Koeffizienten; NIST; [H2, N2, NH3]
 #Achtung: Nur für Temperaturspanne zwischen 298 K und 500 K
-#Noch ändern!
+#Noch ändern! (if else)
 A = np.array([33.066178,28.98641,19.99563])
 B = np.array([-11.363417,1.853978,49.77119])
 C = np.array([11.432816,-9.647459,-15.37599])
@@ -59,8 +65,46 @@ delta_R_S_0 = v_H2 * shomate_S(T, H2) + v_N2 * shomate_S(T, N2) + v_NH3 * shomat
 delta_R_G_0 = delta_R_H_0 - T * delta_R_S_0 # J mol^-1 # Umrechnung in J mol^-1
 
 #allgemeine GGW-Konstante K_0
-#Achtung: hier Overflow! beheben!
-K_0 = np.exp((-delta_R_G_0)/ (R*T)) # 1
+K_0 = np.exp((-delta_R_G_0) / (R*T)) # 1
 
 #spezifische GGW-Konstante K_x
 K_x = K_0 * (p_0 / p)**(sum(v)) # 1 (Summe der stöchiometrischen Koeffizienten im Exponenten)
+
+#Berechnung von Stoffmenge Ammoniak bei gegebenen Stoffmengen von H2 und N2
+
+#Analytische Lösung (Gleichung 4. Grades)
+#Koeffizienten
+a = 1
+b = 2 * (n_H2 * n_N2)
+c = (n_H2 + n_N2)**2
+d = 0
+e = -K_x * n_H2**3 * n_N2
+
+p = (8 * a * c - 3 * b**2) / (8 * a**3)
+q = (b**3 - 4 * a * b * c + 8 * a**2 * d) / (8 * a**3)
+
+delta_0 = c**2 - 3 * b * d + 12 * a * e
+delta_1 = 2 * c**3 - 9 * b * c * d + 27 * b**2 * e + 27 * a * d**2 - 72 * a * c * e
+
+Q = ((delta_1 + (delta_1**2 - 4 * delta_0**3)**0.5) / 2)**(1/3)
+S = 0.5 * (-2 / 3 * p + 1 / (3 * a) * (Q + (delta_0 / Q)))**0.5
+
+n_NH3 = np.zeros(4)
+n_NH3[0] = -b / (4 * a) - S + 0.5 *(-4 * S**2 - 2 * p + q / S)**0.5
+n_NH3[1] = -b / (4 * a) - S - 0.5 *(-4 * S**2 - 2 * p + q / S)**0.5
+n_NH3[2] = -b / (4 * a) + S + 0.5 *(-4 * S**2 - 2 * p + q / S)**0.5
+n_NH3[3] = -b / (4 * a) + S - 0.5 *(-4 * S**2 - 2 * p + q / S)**0.5
+
+#for i in range(0,3):
+#    if n_NH3[]
+
+
+
+
+
+
+
+
+
+
+
