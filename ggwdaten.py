@@ -98,24 +98,18 @@ n_NH3[3] = -b / (4 * a) + S - 0.5 *(-4 * S**2 - 2 * p + q / S)**0.5
 
 
 #Loeschen der physikalisch nicht moeglichen Loesungen
-#Achtung Einträge werden noch nicht gelöscht! Fixen
 k = 3
-for i in range(k,0,-1):
+for i in range(k,0-1,-1):
     if n_NH3[i] < 0:
-        np.delete(n_NH3,i)
+        n_NH3 = np.delete(n_NH3,i)
     elif n_NH3[i] > (-v_NH3 / v_H2 * n_H2):
-        np.delete(n_NH3,i)
+        n_NH3 = np.delete(n_NH3,i)
     elif n_NH3[i] > (-v_NH3 / v_N2 * n_N2):
-        np.delete(n_NH3,i)
+        n_NH3 = np.delete(n_NH3,i)
     print(n_NH3)
 
-print(n_NH3)
         
         
-
-
-
-
 
 
 
