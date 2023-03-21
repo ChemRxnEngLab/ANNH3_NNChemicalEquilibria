@@ -21,8 +21,8 @@ R = 8.31448 # J mol^-1 K^-1 Ideale Gaskonstane
 p_0 = 1 # bar Standarddruck
 
 # Parameter
-T = 300 # K Temperatur
-#T = ([300, 350]) # K Temperatur
+#T = 300 # K Temperatur
+T_array = np.array([300, 350]) # K Temperatur
 p = 2 # bar Druck
 
 n_H2 = 5 # mol Stoffmenge H2
@@ -56,57 +56,67 @@ def shomate_H (T, stoff):
     return H_f
 
 #Standardreaktionsenthalpie delta_R_H_0
-delta_R_H_0 = (v_H2 * shomate_H(T,H2) + v_N2 * shomate_H(T, N2) + v_NH3 * shomate_H(T,NH3)) * 1000 # J mol^-1
+delta_R_H_0 = np.zeros(len(T_array))
+for i in range (0, len(T_array)):
+    T = T_array[i]
+    delta_R_H_0[i] = (v_H2 * shomate_H(T,H2) + v_N2 * shomate_H(T, N2) + v_NH3 * shomate_H(T,NH3)) * 1000 # J mol^-1
 
 #Standardreaktionsentropie delta_R_S_0
-delta_R_S_0 = v_H2 * shomate_S(T, H2) + v_N2 * shomate_S(T, N2) + v_NH3 * shomate_S(T, NH3) # J mol^-1 K^-1
+delta_R_S_0 = np.zeros(len(T_array))
+for i in range (0, len(T_array)):
+    T = T_array[i]
+    delta_R_S_0[i] = v_H2 * shomate_S(T, H2) + v_N2 * shomate_S(T, N2) + v_NH3 * shomate_S(T, NH3) # J mol^-1 K^-1
 
 #freie Standard Reaktionsenthalpie delta_R_G_0
-delta_R_G_0 = delta_R_H_0 - T * delta_R_S_0 # J mol^-1 # Umrechnung in J mol^-1
+delta_R_G_0 = delta_R_H_0 - T_array * delta_R_S_0 # J mol^-1
 
 #allgemeine GGW-Konstante K_0
-K_0 = np.exp((-delta_R_G_0) / (R*T)) # 1
+K_0 = np.exp((-delta_R_G_0) / (T_array * R)) # 1
 
 #spezifische GGW-Konstante K_x
 K_x = K_0 * (p_0 / p)**(sum(v)) # 1 (Summe der stoechiometrischen Koeffizienten im Exponenten)
 
 #Berechnung von Stoffmenge Ammoniak bei gegebenen Stoffmengen von H2 und N2
 
-#Analytische Loesung (Gleichung 4. Grades)
-#Koeffizienten
-a = 1
-b = 2 * (n_H2 * n_N2)
-c = (n_H2 + n_N2)**2
-d = 0
-e = -K_x * n_H2**3 * n_N2
-
-p = (8 * a * c - 3 * b**2) / (8 * a**3)
-q = (b**3 - 4 * a * b * c + 8 * a**2 * d) / (8 * a**3)
-
-delta_0 = c**2 - 3 * b * d + 12 * a * e
-delta_1 = 2 * c**3 - 9 * b * c * d + 27 * b**2 * e + 27 * a * d**2 - 72 * a * c * e
-
-Q = ((delta_1 + (delta_1**2 - 4 * delta_0**3)**0.5) / 2)**(1/3)
-S = 0.5 * (-2 / 3 * p + 1 / (3 * a) * (Q + (delta_0 / Q)))**0.5
-
-#moegliche Loesungen für Stoffmenge von Ammoniak
-n_NH3 = np.zeros(4)
-n_NH3[0] = -b / (4 * a) - S + 0.5 *(-4 * S**2 - 2 * p + q / S)**0.5
-n_NH3[1] = -b / (4 * a) - S - 0.5 *(-4 * S**2 - 2 * p + q / S)**0.5
-n_NH3[2] = -b / (4 * a) + S + 0.5 *(-4 * S**2 - 2 * p + q / S)**0.5
-n_NH3[3] = -b / (4 * a) + S - 0.5 *(-4 * S**2 - 2 * p + q / S)**0.5
-
-
-#Loeschen der physikalisch nicht moeglichen Loesungen
-k = 3
-for i in range(k,0-1,-1):
-    if n_NH3[i] < 0:
-        n_NH3 = np.delete(n_NH3,i)
-    elif n_NH3[i] > (-v_NH3 / v_H2 * n_H2):
-        n_NH3 = np.delete(n_NH3,i)
-    elif n_NH3[i] > (-v_NH3 / v_N2 * n_N2):
-        n_NH3 = np.delete(n_NH3,i)
-    print(n_NH3)
+# =============================================================================
+# #Analytische Loesung (Gleichung 4. Grades)
+# #Koeffizienten
+# a = 1
+# b = 2 * (n_H2 * n_N2)
+# c = (n_H2 + n_N2)**2
+# d = 0
+# e = -K_x * n_H2**3 * n_N2
+# 
+# p = (8 * a * c - 3 * b**2) / (8 * a**3)
+# q = (b**3 - 4 * a * b * c + 8 * a**2 * d) / (8 * a**3)
+# 
+# delta_0 = c**2 - 3 * b * d + 12 * a * e
+# delta_1 = 2 * c**3 - 9 * b * c * d + 27 * b**2 * e + 27 * a * d**2 - 72 * a * c * e
+# 
+# Q = ((delta_1 + (delta_1**2 - 4 * delta_0**3)**0.5) / 2)**(1/3)
+# S = 0.5 * (-2 / 3 * p + 1 / (3 * a) * (Q + (delta_0 / Q)))**0.5
+# 
+# #moegliche Loesungen für Stoffmenge von Ammoniak
+# n_NH3 = np.zeros((4,len(T_array)))
+# n_NH3[0] = -b / (4 * a) - S + 0.5 *(-4 * S**2 - 2 * p + q / S)**0.5
+# n_NH3[1] = -b / (4 * a) - S - 0.5 *(-4 * S**2 - 2 * p + q / S)**0.5
+# n_NH3[2] = -b / (4 * a) + S + 0.5 *(-4 * S**2 - 2 * p + q / S)**0.5
+# n_NH3[3] = -b / (4 * a) + S - 0.5 *(-4 * S**2 - 2 * p + q / S)**0.5
+# print(n_NH3)
+# 
+# 
+# #Loeschen der physikalisch nicht moeglichen Loesungen
+# k = 3
+# for j in range (0, len(T_array)):
+#     for i in range(k,0-1,-1):
+#         if n_NH3[i,j] < 0:
+#             n_NH3 = np.delete(n_NH3,[i,j])
+#         elif n_NH3[i,j] > (-v_NH3 / v_H2 * n_H2):
+#             n_NH3 = np.delete(n_NH3,[i,j])
+#         elif n_NH3[i,j] > (-v_NH3 / v_N2 * n_N2):
+#             n_NH3 = np.delete(n_NH3,[i,j])
+#     print(n_NH3)
+# =============================================================================
 
         
         
