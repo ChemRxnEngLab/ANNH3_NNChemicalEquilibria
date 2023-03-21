@@ -3,7 +3,7 @@
 #Importe / Bibliotheken
 import numpy as np
 
-#Stöchiometrische Koeffizienten Ammoniaksynthese
+#Stoechiometrische Koeffizienten Ammoniaksynthese
 v_H2 = -3
 v_N2 = -1
 v_NH3 = 2
@@ -31,7 +31,7 @@ n_N2 = 1/3 * n_H2 # mol Stoffmenge N2 (stöchiometrisch)
 
 #Shomate Koeffizienten; NIST; [H2, N2, NH3]
 #Achtung: Nur für Temperaturspanne zwischen 298 K und 500 K
-#Noch ändern! (if else)
+#Noch aendern! (if else)
 A = np.array([33.066178,28.98641,19.99563])
 B = np.array([-11.363417,1.853978,49.77119])
 C = np.array([11.432816,-9.647459,-15.37599])
@@ -68,11 +68,11 @@ delta_R_G_0 = delta_R_H_0 - T * delta_R_S_0 # J mol^-1 # Umrechnung in J mol^-1
 K_0 = np.exp((-delta_R_G_0) / (R*T)) # 1
 
 #spezifische GGW-Konstante K_x
-K_x = K_0 * (p_0 / p)**(sum(v)) # 1 (Summe der stöchiometrischen Koeffizienten im Exponenten)
+K_x = K_0 * (p_0 / p)**(sum(v)) # 1 (Summe der stoechiometrischen Koeffizienten im Exponenten)
 
 #Berechnung von Stoffmenge Ammoniak bei gegebenen Stoffmengen von H2 und N2
 
-#Analytische Lösung (Gleichung 4. Grades)
+#Analytische Loesung (Gleichung 4. Grades)
 #Koeffizienten
 a = 1
 b = 2 * (n_H2 * n_N2)
@@ -89,14 +89,29 @@ delta_1 = 2 * c**3 - 9 * b * c * d + 27 * b**2 * e + 27 * a * d**2 - 72 * a * c 
 Q = ((delta_1 + (delta_1**2 - 4 * delta_0**3)**0.5) / 2)**(1/3)
 S = 0.5 * (-2 / 3 * p + 1 / (3 * a) * (Q + (delta_0 / Q)))**0.5
 
+#moegliche Loesungen für Stoffmenge von Ammoniak
 n_NH3 = np.zeros(4)
 n_NH3[0] = -b / (4 * a) - S + 0.5 *(-4 * S**2 - 2 * p + q / S)**0.5
 n_NH3[1] = -b / (4 * a) - S - 0.5 *(-4 * S**2 - 2 * p + q / S)**0.5
 n_NH3[2] = -b / (4 * a) + S + 0.5 *(-4 * S**2 - 2 * p + q / S)**0.5
 n_NH3[3] = -b / (4 * a) + S - 0.5 *(-4 * S**2 - 2 * p + q / S)**0.5
 
-#for i in range(0,3):
-#    if n_NH3[]
+
+#Loeschen der physikalisch nicht moeglichen Loesungen
+#Achtung Einträge werden noch nicht gelöscht! Fixen
+k = 3
+for i in range(k,0,-1):
+    if n_NH3[i] < 0:
+        np.delete(n_NH3,i)
+    elif n_NH3[i] > (-v_NH3 / v_H2 * n_H2):
+        np.delete(n_NH3,i)
+    elif n_NH3[i] > (-v_NH3 / v_N2 * n_N2):
+        np.delete(n_NH3,i)
+    print(n_NH3)
+
+print(n_NH3)
+        
+        
 
 
 
