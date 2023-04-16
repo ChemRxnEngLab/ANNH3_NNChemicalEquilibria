@@ -52,14 +52,24 @@ def shomate_S (T, stoff):
 
 def shomate_H (T, stoff):
     t = T / 1000
-    H_f = A[stoff] * t + B[stoff] * t**2 / 2 + C[stoff] * t**3 / 3 + D[stoff] * t**4 / 4 - E[stoff] / t + F[stoff] - H[stoff] + delta_f_H_0_ref[stoff] 
-    return H_f
+    H_0 = A[stoff] * t + B[stoff] * t**2 / 2 + C[stoff] * t**3 / 3 + D[stoff] * t**4 / 4 - E[stoff] / t + F[stoff] - H[stoff] + delta_f_H_0_ref[stoff] 
+    return H_0
+
+#Standardbildungsenthalpie delta_f_H_0
+def delta_f_H_0(T, stoff):
+    #N2 oder H2 --> Standardbildungsenthalpie == 0
+    if stoff != 2:
+        delta_f_H_0 = 0.0
+    #NH3 Berechnung der Standardbildungsenthalpie aus Shomate-Enthalpie
+    else:
+        delta_f_H_0 = v_NH3 * shomate_H(T, NH3) + v_N2 * shomate_H(T,N2) + v_H2 * shomate_H(T,H2)
+    return delta_f_H_0
 
 #Standardreaktionsenthalpie delta_R_H_0
 delta_R_H_0 = np.zeros(len(T_array))
 for i in range (0, len(T_array)):
     T = T_array[i]
-    delta_R_H_0[i] = (v_H2 * shomate_H(T,H2) + v_N2 * shomate_H(T, N2) + v_NH3 * shomate_H(T,NH3)) * 1000 # J mol^-1
+    delta_R_H_0[i] = (v_H2 * delta_f_H_0(T,H2) + v_N2 * delta_f_H_0(T, N2) + v_NH3 * delta_f_H_0(T,NH3)) * 1000 # J mol^-1
 
 #Standardreaktionsentropie delta_R_S_0
 delta_R_S_0 = np.zeros(len(T_array))
@@ -76,8 +86,19 @@ K_0 = np.exp((-delta_R_G_0) / (T_array * R)) # 1
 #spezifische GGW-Konstante K_x
 K_x = K_0 * (p_0 / p)**(sum(v)) # 1 (Summe der stoechiometrischen Koeffizienten im Exponenten)
 
-#Berechnung von Stoffmenge Ammoniak bei gegebenen Stoffmengen von H2 und N2
+# =============================================================================
+# #Berechnung von Stoffmenge Ammoniak bei gegebenen Stoffmengen von H2 und N2
+# #Analytische Loesung (Gleichung 3. Grades)
+# #Koeffizienten
+# a = 
+# b =
+# c =
+# 
+# # Substitution
+# z = x
+# =============================================================================
 
+#
 # =============================================================================
 # #Analytische Loesung (Gleichung 4. Grades)
 # #Koeffizienten
