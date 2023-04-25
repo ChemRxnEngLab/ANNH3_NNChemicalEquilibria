@@ -24,15 +24,15 @@ p_0 = 1 # bar Standarddruck
 
 # Parameter
 #T = 300 # K Temperatur
-T_array = np.array([300, 350]) # K Temperatur
-p = 2 # bar Druck
+T = np.array([300, 350]) # K Temperatur
+#p = 2 # bar Druck
+p = np.array([1.5, 2]) # bar Druck
 
 
 #Stofffmengen zu Reaktionsbeginn
-n_H2_0 = 5 # mol Stoffmenge H2
-n_N2_0 = 3 # mol Stoffmenge N2
-n_NH3_0 = 0 # mol Stoffmenge NH3
-n_ges_0 = n_H2_0 + n_N2_0 + n_NH3_0 # mol Gesamtstoffmenge
+n_H2_0 = [5, 6] # mol Stoffmenge H2 Start
+n_N2_0 = [3, 5] # mol Stoffmenge N2 Start
+n_NH3_0 = [0, 1] # mol Stoffmenge NH3 Start
 
 
 #Shomate Koeffizienten; NIST; [H2, N2, NH3]
@@ -71,52 +71,101 @@ def delta_f_H_0(T, stoff):
         delta_f_H_0 = (v_NH3 / v_NH3) * shomate_H(T, NH3) + (v_N2 / v_NH3) * shomate_H(T,N2) + (v_H2 / v_NH3) * shomate_H(T,H2)
     return delta_f_H_0
 
-#Standardreaktionsenthalpie delta_R_H_0
-delta_R_H_0 = np.zeros(len(T_array))
-for i in range (0, len(T_array)):
-    T = T_array[i]
-    delta_R_H_0[i] = (v_H2 * delta_f_H_0(T,H2) + v_N2 * delta_f_H_0(T, N2) + v_NH3 * delta_f_H_0(T,NH3)) * 1000 # J mol^-1
+#Gleichgewichtsberechnung
+def GGW(T, p, n_H2_0, n_N2_0, n_NH3_0):
+    
+    #Standardreaktionsenthalpie delta_R_H_0
+    delta_R_H_0 = (v_H2 * delta_f_H_0(T,H2) + v_N2 * delta_f_H_0(T, N2) + v_NH3 * delta_f_H_0(T,NH3)) * 1000 # J mol^-1
+    
+    #Standardreaktionsentropie delta_R_S_0
+    delta_R_S_0 = v_H2 * shomate_S(T, H2) + v_N2 * shomate_S(T, N2) + v_NH3 * shomate_S(T, NH3) # J mol^-1 K^-1
+    
+    #freie Standard Reaktionsenthalpie delta_R_G_0
+    delta_R_G_0 = delta_R_H_0 - T * delta_R_S_0 # J mol^-1
+    
+    #allgemeine GGW-Konstante K_0
+    K_0 = np.exp((-delta_R_G_0) / (T * R)) # 1
+    
+    #spezifische GGW-Konstante K_x
+    K_x = K_0 * (p_0 / p)**(sum(v)) # 1 (Summe der stoechiometrischen Koeffizienten im Exponenten)
+    
+    #Numerische Loesung
+    #Definition der Funktion
+    n_ges_0 = n_H2_0 + n_N2_0 + n_NH3_0 # mol Gesamtstoffmenge
+    def fun(xi):
+        return (n_NH3_0 + 2 * xi)**2 * (n_ges_0 - 2 * xi)**2 - K_x * (n_H2_0 - 3 * xi)**3 * (n_N2_0 - xi)
 
-#Standardreaktionsentropie delta_R_S_0
-delta_R_S_0 = np.zeros(len(T_array))
-for i in range (0, len(T_array)):
-    T = T_array[i]
-    delta_R_S_0[i] = v_H2 * shomate_S(T, H2) + v_N2 * shomate_S(T, N2) + v_NH3 * shomate_S(T, NH3) # J mol^-1 K^-1
+    #Bestimmung Startwert
+    xi_0 = (-0.5 * n_NH3_0 + min(n_N2_0, 1/3 * n_H2_0)) / 2
 
-#freie Standard Reaktionsenthalpie delta_R_G_0
-delta_R_G_0 = delta_R_H_0 - T_array * delta_R_S_0 # J mol^-1
+    #Lösung Polynom
+    sol = root(fun, xi_0)
+    xi = sol.x # mol Reaktionslaufzahl
+    
+    #Kontrolle: phyiskalisch moegliche Loesung?
+    if xi < (-0.5 * n_NH3_0) or xi > min(n_N2_0, 1/3 * n_H2_0):
+        #Fehlermeldung
+        raise Warning("Xi ist physikalisch nicht moeglich!")
+    
+    return(xi)
 
-#allgemeine GGW-Konstante K_0
-K_0 = np.exp((-delta_R_G_0) / (T_array * R)) # 1
+#Aufruf der GGW-Funktion und Berechnung der Stoffmengen im GGW
+xi = np.zeros(len(n_H2_0))
+for i in range(0, len(n_H2_0)):
+    xi[i] = GGW(T[i], p[i], n_H2_0[i], n_N2_0[i], n_NH3_0[i])
+    #Berechnung der Stoffmengen im Gleichgewicht
+    
+n_H2 = xi * v_H2 + n_H2_0 # mol Stoffmenge H2 Gleichgewicht
+n_N2 = xi * v_N2 + n_N2_0 # mol Stoffmenge N2 Gleichgewicht
+n_NH3 = xi * v_NH3 + n_NH3_0 # mol Stoffmenge NH3 Gleichgewicht
 
-#spezifische GGW-Konstante K_x
-K_x = K_0 * (p_0 / p)**(sum(v)) # 1 (Summe der stoechiometrischen Koeffizienten im Exponenten)
 
-#Numerische Loesung
-#Definition der Funktion
-def fun(xi):
-    return (n_NH3_0 + 2 * xi)**2 * (n_ges_0 - 2 * xi)**2 - K_x * (n_H2_0 - 3 * xi)**3 * (n_N2_0 - xi)
+# #Standardreaktionsentropie delta_R_S_0
+# delta_R_S_0 = np.zeros(len(T_array))
+# for i in range (0, len(T_array)):
+#     T = T_array[i]
+#     delta_R_S_0[i] = v_H2 * shomate_S(T, H2) + v_N2 * shomate_S(T, N2) + v_NH3 * shomate_S(T, NH3) # J mol^-1 K^-1
 
-#Bestimmung Startwert
-xi_0 = (-0.5 * n_NH3_0 + min(n_N2_0, 1/3 * n_H2_0)) / 2
-xi_0 = np.full_like(K_x, xi_0)
-#Lösung Polynom
-sol = root(fun, xi_0)
-xi = sol.x
+# #freie Standard Reaktionsenthalpie delta_R_G_0
+# delta_R_G_0 = delta_R_H_0 - T_array * delta_R_S_0 # J mol^-1
 
-#Kontrolle: pyhiskalisch moegliche Loesung?
-for i in range(0, len(xi)):
-    j = 0 # Zähler while-Schleife resetten
-    while xi[i] < (-0.5 * n_NH3_0) or xi[i] > min(n_N2_0, 1/3 * n_H2_0):
-        #Berechnung xi mit anderem Startwert
-        xi_0[i] = (-0.5 * n_NH3_0 + min(n_N2_0, 1/3 * n_H2_0)) / (4 * (j+1))
-        sol = root(fun, xi_0)
-        xi = sol.x
+# #allgemeine GGW-Konstante K_0
+# K_0 = np.exp((-delta_R_G_0) / (T_array * R)) # 1
 
-#Berechnung der Stoffmengen im Gleichgewicht
-n_H2 = xi * v_H2 + n_H2_0
-n_N2 = xi * v_N2 + n_N2_0
-n_NH3 = xi * v_NH3 + n_NH3_0
+# #spezifische GGW-Konstante K_x
+# # K_x = np.zeros((len(K_0), len(p_array)))
+# # for i in range(0,len(K_0)):
+# #     K_x[i] = K_0[i]* (p_0 / p_array)**(sum(v)) # 1 (Summe der stoechiometrischen Koeffizienten im Exponenten)
+
+# K_x = K_0 * (p_0 / p)**(sum(v)) # 1 (Summe der stoechiometrischen Koeffizienten im Exponenten)
+
+
+# #Numerische Loesung
+# #Definition der Funktion
+# n_ges_0 = n_H2_0 + n_N2_0 + n_NH3_0 # mol Gesamtstoffmenge
+# def fun(xi):
+#     return (n_NH3_0 + 2 * xi)**2 * (n_ges_0 - 2 * xi)**2 - K_x * (n_H2_0 - 3 * xi)**3 * (n_N2_0 - xi)
+
+# #Bestimmung Startwert
+# xi_0 = (-0.5 * n_NH3_0 + min(n_N2_0, 1/3 * n_H2_0)) / 2
+# xi_0 = np.full_like(K_x, xi_0)
+# #Lösung Polynom
+# sol = root(fun, xi_0)
+# xi = sol.x #mol Reaktionslaufzahl
+
+# #Kontrolle: pyhiskalisch moegliche Loesung?
+# for i in range(0, len(xi)):
+#     j = 0 # Zähler while-Schleife resetten
+#     while xi[i] < (-0.5 * n_NH3_0) or xi[i] > min(n_N2_0, 1/3 * n_H2_0):
+#         #Berechnung xi mit anderem Startwert
+#         xi_0[i] = (-0.5 * n_NH3_0 + min(n_N2_0, 1/3 * n_H2_0)) / (4 * (j+1))
+#         sol = root(fun, xi_0)
+#         xi = sol.x #mol Reaktionslaufzahl
+
+# #Berechnung der Stoffmengen im Gleichgewicht
+# n_H2 = xi * v_H2 + n_H2_0 # mol Stoffmenge H2 Gleichgewicht
+# n_N2 = xi * v_N2 + n_N2_0 # mol Stoffmenge N2 Gleichgewicht
+# n_NH3 = xi * v_NH3 + n_NH3_0 # mol Stoffmenge NH3 Gleichgewicht
 
 
     
@@ -158,45 +207,6 @@ n_NH3 = xi * v_NH3 + n_NH3_0
 # print(xi)
 # # =============================================================================
  
-# #Loesung
-# #Analytische Loesung (Gleichung 4. Grades)
-# #Koeffizienten
-# a = K_x * v_N2 * v_H2**3 - (v_NH3**2 * sum(v)**2)
-# b = K_x * (n_N2_0 * v_H2**3 + 3 * v_N2 * n_H2_0 * v_H2**2) - (2 * n_NH3_0 * v_NH3 * sum(v)**2 + 2 * n_ges_0 * v_NH3**2 * sum(v))
-# c = K_x * (3 * n_N2_0 * n_H2_0 * v_H2**2 + 3 * n_H2_0**2 * v_H2**2) - (n_NH3_0**2 * sum(v)**2 + 4 * n_NH3_0 * v_NH3 * n_ges_0 * sum(v) + v_NH3**2 * n_ges_0**2)
-# d = K_x * (3 * n_N2_0 * n_H2_0**2 * v_H2 + v_N2 * n_H2_0**3) - (2 * n_NH3_0**2 * n_ges_0 * sum(v) + 2 * n_NH3_0 * v_NH3 * n_ges_0**2)
-# e = K_x * (n_N2_0 * n_H2_0**3) - (n_NH3_0**2 * n_ges_0**2)
- 
-# A = 1
-# B = B / A
-# C = C / A
-# D = D / A
-# E = E / A
-
-# p = C - (3 / 8) * B**2
-# q = D + (1 / 8) * B**3 - (1 / 2) * B * C
-# r = E - (3 / 256) * B**4 - (1 / 4) * B * D + (1 / 16) * B**2 * C
-
-# #Bestimmung von P durch Loesen von Polynom 3. Grades
-
-
-# #Lösen LGS
-# R = 
-
-
-# z = np.zeros((4,len(T_array)))
-# z[0] = (Q / 2) + ((Q/2)**2 - P + R)**0.5
-# z[1] = (Q / 2) - ((Q/2)**2 - P + R)**0.5
-# z[2] = -(Q / 2) + ((Q/2)**2 - P - R)**0.5
-# z[3] = -(Q / 2) - ((Q/2)**2 - P - R)**0.5
-
-# #Resubstitution
-# xi = z - (B / 4)
-
-
-
-
-# =============================================================================
 # #Loeschen der physikalisch nicht moeglichen Loesungen
 # k = 3
 # for j in range (0, len(T_array)):
