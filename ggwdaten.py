@@ -30,7 +30,7 @@ p = 2 # bar Druck
 
 #Stofffmengen zu Reaktionsbeginn
 n_H2_0 = 5 # mol Stoffmenge H2
-n_N2_0 = 1/3 * n_H2_0 # mol Stoffmenge N2 (stöchiometrisch)
+n_N2_0 = 3 # mol Stoffmenge N2
 n_NH3_0 = 0 # mol Stoffmenge NH3
 n_ges_0 = n_H2_0 + n_N2_0 + n_NH3_0 # mol Gesamtstoffmenge
 
@@ -92,7 +92,7 @@ K_0 = np.exp((-delta_R_G_0) / (T_array * R)) # 1
 #spezifische GGW-Konstante K_x
 K_x = K_0 * (p_0 / p)**(sum(v)) # 1 (Summe der stoechiometrischen Koeffizienten im Exponenten)
 
-#Numerische Lösung
+#Numerische Loesung
 #Definition der Funktion
 def fun(xi):
     return (n_NH3_0 + 2 * xi)**2 * (n_ges_0 - 2 * xi)**2 - K_x * (n_H2_0 - 3 * xi)**3 * (n_N2_0 - xi)
@@ -103,6 +103,18 @@ xi_0 = np.full_like(K_x, xi_0)
 #Lösung Polynom
 sol = root(fun, xi_0)
 xi = sol.x
+
+#Kontrolle: pyhiskalisch moegliche Loesung?
+for i in range(0, len(xi)):
+    j = 0 # Zähler while-Schleife resetten
+    while xi[i] < (-0.5 * n_NH3_0) or xi[i] > min(n_N2_0, 1/3 * n_H2_0):
+        #Berechnung xi mit anderem Startwert
+        xi_0[i] = (-0.5 * n_NH3_0 + min(n_N2_0, 1/3 * n_H2_0)) / (4 * (j+1))
+        sol = root(fun, xi_0)
+        xi = sol.x
+
+
+    
 
 # #Lösung durch Wurzelausdrücke
 # # =============================================================================
