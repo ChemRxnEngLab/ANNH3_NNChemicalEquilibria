@@ -113,6 +113,11 @@ for i in range(0, len(xi)):
         sol = root(fun, xi_0)
         xi = sol.x
 
+#Berechnung der Stoffmengen im Gleichgewicht
+n_H2 = xi * v_H2 + n_H2_0
+n_N2 = xi * v_N2 + n_N2_0
+n_NH3 = xi * v_NH3 + n_NH3_0
+
 
     
 
