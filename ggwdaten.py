@@ -2,6 +2,8 @@
 
 #Importe / Bibliotheken
 import numpy as np
+from scipy.optimize import root
+
 
 #Stoechiometrische Koeffizienten Ammoniaksynthese
 v_H2 = -3
@@ -66,7 +68,7 @@ def delta_f_H_0(T, stoff):
         delta_f_H_0 = 0.0
     #NH3 Berechnung der Standardbildungsenthalpie aus Shomate-Enthalpie
     else:
-        delta_f_H_0 = v_NH3 * shomate_H(T, NH3) + v_N2 * shomate_H(T,N2) + v_H2 * shomate_H(T,H2)
+        delta_f_H_0 = (v_NH3 / v_NH3) * shomate_H(T, NH3) + (v_N2 / v_NH3) * shomate_H(T,N2) + (v_H2 / v_NH3) * shomate_H(T,H2)
     return delta_f_H_0
 
 #Standardreaktionsenthalpie delta_R_H_0
@@ -90,39 +92,91 @@ K_0 = np.exp((-delta_R_G_0) / (T_array * R)) # 1
 #spezifische GGW-Konstante K_x
 K_x = K_0 * (p_0 / p)**(sum(v)) # 1 (Summe der stoechiometrischen Koeffizienten im Exponenten)
 
-#
-#Analytische Loesung (Gleichung 4. Grades)
-#Koeffizienten
-a = K_x * v_N2 * v_H2**3 - (v_NH3**2 * sum(v)**2)
-b = K_x * (n_N2_0 * v_H2**3 + 3 * v_N2 * n_H2_0 * v_H2**2) - (2 * n_NH3_0 * v_NH3 * sum(v)**2 + 2 * n_ges_0 * v_NH3**2 * sum(v))
-c = K_x * (3 * n_N2_0 * n_H2_0 * v_H2**2 + 3 * n_H2_0**2 * v_H2**2) - (n_NH3_0**2 * sum(v)**2 + 4 * n_NH3_0 * v_NH3 * n_ges_0 * sum(v) + v_NH3**2 * n_ges_0**2)
-d = K_x * (3 * n_N2_0 * n_H2_0**2 * v_H2 + v_N2 * n_H2_0**3) - (2 * n_NH3_0**2 * n_ges_0 * sum(v) + 2 * n_NH3_0 * v_NH3 * n_ges_0**2)
-e = K_x * (n_N2_0 * n_H2_0**3) - (n_NH3_0**2 * n_ges_0**2)
+#Numerische Lösung
+#Definition der Funktion
+def fun(xi):
+    return (n_NH3_0 + 2 * xi)**2 * (n_ges_0 - 2 * xi)**2 - K_x * (n_H2_0 - 3 * xi)**3 * (n_N2_0 - xi)
+
+#Bestimmung Startwert
+xi_0 = (-0.5 * n_NH3_0 + min(n_N2_0, 1/3 * n_H2_0)) / 2
+xi_0 = np.full_like(K_x, xi_0)
+#Lösung Polynom
+sol = root(fun, xi_0)
+xi = sol.x
+
+# #Lösung durch Wurzelausdrücke
+# # =============================================================================
+# #Analytische Loesung (Gleichung 4. Grades)
+# #Koeffizienten
+# a = K_x * v_N2 * v_H2**3 - (v_NH3**2 * sum(v)**2)
+# b = K_x * (n_N2_0 * v_H2**3 + 3 * v_N2 * n_H2_0 * v_H2**2) - (2 * n_NH3_0 * v_NH3 * sum(v)**2 + 2 * n_ges_0 * v_NH3**2 * sum(v))
+# c = K_x * (3 * n_N2_0 * n_H2_0 * v_H2**2 + 3 * n_H2_0**2 * v_H2**2) - (n_NH3_0**2 * sum(v)**2 + 4 * n_NH3_0 * v_NH3 * n_ges_0 * sum(v) + v_NH3**2 * n_ges_0**2)
+# d = K_x * (3 * n_N2_0 * n_H2_0**2 * v_H2 + v_N2 * n_H2_0**3) - (2 * n_NH3_0**2 * n_ges_0 * sum(v) + 2 * n_NH3_0 * v_NH3 * n_ges_0**2)
+# e = K_x * (n_N2_0 * n_H2_0**3) - (n_NH3_0**2 * n_ges_0**2)
 
 
-# =============================================================================
-# a = 1
-# b = B / A
-# c = C / A
-# d = D / A
-# e = E / A
-# =============================================================================
-p = (8 * a * c - 3 * b**2) / (8 * a**3)
-q = (b**3 - 4 * a * b * c + 8 * a**2 * d) / (8 * a**3)
+# # =============================================================================
+# # a = 1
+# # b = B / A
+# # c = C / A
+# # d = D / A
+# # e = E / A
+# # =============================================================================
+# p = (8 * a * c - 3 * b**2) / (8 * a**3)
+# q = (b**3 - 4 * a * b * c + 8 * a**2 * d) / (8 * a**3)
 
-delta_0 = c**2 - 3 * b * d + 12 * a * e
-delta_1 = 2 * c**3 - 9 * b * c * d + 27 * b**2 * e + 27 * a * d**2 - 72 * a * c * e
+# delta_0 = c**2 - 3 * b * d + 12 * a * e
+# delta_1 = 2 * c**3 - 9 * b * c * d + 27 * b**2 * e + 27 * a * d**2 - 72 * a * c * e
 
-Q = ((delta_1 + (delta_1**2 - 4 * delta_0**3)**0.5) / 2)**(1/3) # Achtung negative Wurzel
-S = 0.5 * (-2 / 3 * p + 1 / (3 * a) * (Q + (delta_0 / Q)))**0.5
 
-#moegliche Loesungen für Stoffmenge von Ammoniak
-xi = np.zeros((4,len(T_array)))
-xi[0] = -b / (4 * a) - S + 0.5 *(-4 * S**2 - 2 * p + q / S)**0.5
-xi[1] = -b / (4 * a) - S - 0.5 *(-4 * S**2 - 2 * p + q / S)**0.5
-xi[2] = -b / (4 * a) + S + 0.5 *(-4 * S**2 - 2 * p + q / S)**0.5
-xi[3] = -b / (4 * a) + S - 0.5 *(-4 * S**2 - 2 * p + q / S)**0.5
-print(xi)
+# Q = ((delta_1 + (delta_1**2 - 4 * delta_0**3)**0.5) / 2)**(1/3) # Achtung negative Wurzel
+# S = 0.5 * (-2 / 3 * p + 1 / (3 * a) * (Q + (delta_0 / Q)))**0.5
+
+# #moegliche Loesungen für Stoffmenge von Ammoniak
+# xi = np.zeros((4,len(T_array)))
+# xi[0] = -b / (4 * a) - S + 0.5 *(-4 * S**2 - 2 * p + q / S)**0.5
+# xi[1] = -b / (4 * a) - S - 0.5 *(-4 * S**2 - 2 * p + q / S)**0.5
+# xi[2] = -b / (4 * a) + S + 0.5 *(-4 * S**2 - 2 * p + q / S)**0.5
+# xi[3] = -b / (4 * a) + S - 0.5 *(-4 * S**2 - 2 * p + q / S)**0.5
+# print(xi)
+# # =============================================================================
+ 
+# #Loesung
+# #Analytische Loesung (Gleichung 4. Grades)
+# #Koeffizienten
+# a = K_x * v_N2 * v_H2**3 - (v_NH3**2 * sum(v)**2)
+# b = K_x * (n_N2_0 * v_H2**3 + 3 * v_N2 * n_H2_0 * v_H2**2) - (2 * n_NH3_0 * v_NH3 * sum(v)**2 + 2 * n_ges_0 * v_NH3**2 * sum(v))
+# c = K_x * (3 * n_N2_0 * n_H2_0 * v_H2**2 + 3 * n_H2_0**2 * v_H2**2) - (n_NH3_0**2 * sum(v)**2 + 4 * n_NH3_0 * v_NH3 * n_ges_0 * sum(v) + v_NH3**2 * n_ges_0**2)
+# d = K_x * (3 * n_N2_0 * n_H2_0**2 * v_H2 + v_N2 * n_H2_0**3) - (2 * n_NH3_0**2 * n_ges_0 * sum(v) + 2 * n_NH3_0 * v_NH3 * n_ges_0**2)
+# e = K_x * (n_N2_0 * n_H2_0**3) - (n_NH3_0**2 * n_ges_0**2)
+ 
+# A = 1
+# B = B / A
+# C = C / A
+# D = D / A
+# E = E / A
+
+# p = C - (3 / 8) * B**2
+# q = D + (1 / 8) * B**3 - (1 / 2) * B * C
+# r = E - (3 / 256) * B**4 - (1 / 4) * B * D + (1 / 16) * B**2 * C
+
+# #Bestimmung von P durch Loesen von Polynom 3. Grades
+
+
+# #Lösen LGS
+# R = 
+
+
+# z = np.zeros((4,len(T_array)))
+# z[0] = (Q / 2) + ((Q/2)**2 - P + R)**0.5
+# z[1] = (Q / 2) - ((Q/2)**2 - P + R)**0.5
+# z[2] = -(Q / 2) + ((Q/2)**2 - P - R)**0.5
+# z[3] = -(Q / 2) - ((Q/2)**2 - P - R)**0.5
+
+# #Resubstitution
+# xi = z - (B / 4)
+
+
 
 
 # =============================================================================
