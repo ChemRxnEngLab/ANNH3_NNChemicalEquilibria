@@ -23,10 +23,7 @@ R = 8.31448 # J mol^-1 K^-1 Ideale Gaskonstane
 p_0 = 1 # bar Standarddruck
 
 # Parameter
-#T = 300 # K Temperatur
-T = np.array([300, 350]) # K Temperatur
-#p = 2 # bar Druck
-p = np.array([1.5, 2]) # bar Druck
+num = 1000 # Anzahl der Werte im Vektor
 
 T = np.random.uniform(600,800 + 1,num) # K Temperatur
 p = np.random.uniform(100,250 + 1,num) # bar Druck
