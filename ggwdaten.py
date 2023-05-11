@@ -28,25 +28,59 @@ T = np.array([300, 350]) # K Temperatur
 #p = 2 # bar Druck
 p = np.array([1.5, 2]) # bar Druck
 
+T = np.random.uniform(600,800 + 1,num) # K Temperatur
+p = np.random.uniform(100,250 + 1,num) # bar Druck
 
 #Stofffmengen zu Reaktionsbeginn
-n_H2_0 = [5, 6] # mol Stoffmenge H2 Start
-n_N2_0 = [3, 5] # mol Stoffmenge N2 Start
-n_NH3_0 = [0, 1] # mol Stoffmenge NH3 Start
-
+n_ges_0 = 1 # mol Gesamtstoffmenge zum Reaktionsbeginn
+x_0 = np.random.dirichlet((1,1,1),num) # 1 Stoffmengenanteile zu Reaktionsbeginn
+n_H2_0 = x_0[:,0] * n_ges_0 # mol Stoffmenge H2 Start
+n_N2_0 = x_0[:,1] * n_ges_0 # mol Stoffmenge N2 Start
+n_NH3_0 = x_0[:,2] * n_ges_0 # mol Stoffmenge NH3 Start
 
 #Shomate Koeffizienten; NIST; [H2, N2, NH3]
-#Achtung: Nur für Temperaturspanne zwischen 298 K und 500 K
-#Noch aendern! (if else)
 A = np.array([33.066178,28.98641,19.99563])
 B = np.array([-11.363417,1.853978,49.77119])
 C = np.array([11.432816,-9.647459,-15.37599])
-D = np.array([-2.772874,16.63537	,1.921168])
+D= np.array([-2.772874,16.63537	,1.921168])
 E = np.array([-0.158558,0.000117,0.189174])
 F = np.array([-9.980797,-8.671914,-53.30667])
 G = np.array([172.707974,226.4168,203.8591])
 H = np.array([0.0,0.0,-45.89806])
-
+# A = np.zeros((num,3))
+# B = C = D = E = F = G = H = np.zeros((num))
+# for i in range(0,num-1):
+#     if T[i] < 298:
+#         raise Warning ("No data for this temperature available.")
+#     elif T[i] < 500:
+#         A = np.append(A,[[33.066178],[28.98641],[19.99563]],axis=0)
+#         B[i] = np.array([-11.363417,1.853978,49.77119])
+#         C[i] = np.array([11.432816,-9.647459,-15.37599])
+#         D[i] = np.array([-2.772874,16.63537	,1.921168])
+#         E[i] = np.array([-0.158558,0.000117,0.189174])
+#         F[i] = np.array([-9.980797,-8.671914,-53.30667])
+#         G[i] = np.array([172.707974,226.4168,203.8591])
+#         H[i] = np.array([0.0,0.0,-45.89806])
+#     elif T < 1000:
+#         A[i] = np.array([33.066178,19.50583,19.99563])
+#         B[i] = np.array([-11.363417,19.88705,49.77119])
+#         C[i] = np.array([11.432816,-8.598535,-15.37599])
+#         D[i] = np.array([-2.772874,1.369784	,1.921168])
+#         E[i] = np.array([-0.158558,0.527601,0.189174])
+#         F[i] = np.array([-9.980797,-4.935202,-53.30667])
+#         G[i] = np.array([172.707974,212.3900,203.8591])
+#         H[i] = np.array([0.0,0.0,-45.89806])
+#     elif T < 1400:
+#         A[i] = np.array([18.563083,19.50583,19.99563])
+#         B[i] = np.array([12.257357,19.88705,49.77119])
+#         C[i] = np.array([-2.859786,-8.598535,-15.37599])
+#         D[i] = np.array([0.268238,1.369784	,1.921168])
+#         E[i] = np.array([1.977990,0.527601,0.189174])
+#         F[i] = np.array([-1.147438,-4.935202,-53.30667])
+#         G[i] = np.array([156.288133,212.3900,203.8591])
+#         H[i] = np.array([0.0,0.0,-45.89806])
+#     else:
+#         raise Warning ("Temperature is too high.")
 #Standardbildungsenthalpie delta_f_H_0_ref; NIST; [H2, N2, NH3]
 delta_f_H_0_ref = np.array([0.0, 0.0, -45.90]) # kJ mol^-1
 
@@ -91,7 +125,6 @@ def GGW(T, p, n_H2_0, n_N2_0, n_NH3_0):
     
     #Numerische Loesung
     #Definition der Funktion
-    n_ges_0 = n_H2_0 + n_N2_0 + n_NH3_0 # mol Gesamtstoffmenge
     def fun(xi):
         return (n_NH3_0 + 2 * xi)**2 * (n_ges_0 - 2 * xi)**2 - K_x * (n_H2_0 - 3 * xi)**3 * (n_N2_0 - xi)
 
@@ -102,10 +135,10 @@ def GGW(T, p, n_H2_0, n_N2_0, n_NH3_0):
     sol = root(fun, xi_0)
     xi = sol.x # mol Reaktionslaufzahl
     
-    #Kontrolle: phyiskalisch moegliche Loesung?
+    #Kontrolle: physikalisch moegliche Loesung?
     if xi < (-0.5 * n_NH3_0) or xi > min(n_N2_0, 1/3 * n_H2_0):
         #Fehlermeldung
-        raise Warning("Xi ist physikalisch nicht moeglich!")
+        raise Warning("Impossible value for xi.")
     
     return(xi)
 
