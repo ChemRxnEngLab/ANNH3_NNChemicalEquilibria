@@ -158,36 +158,41 @@ n_N2 = xi * v_N2 + n_N2_0 # mol Stoffmenge N2 Gleichgewicht
 n_NH3 = xi * v_NH3 + n_NH3_0 # mol Stoffmenge NH3 Gleichgewicht
 
 #Plots
-#Diagramm1: Parameter zur Berechnung von xi über T bei versch. Druecken
 num_plot = 50 #Anzahl der berechneten Punkte
+n_ges_0_plot = 1 #mol Gesamtstoffmenge Start
+x_H2_0_plot = 3/4 #1 Stoffmengenanteil H2 Start
+x_N2_0_plot = 1/4 #1 Stoffmengenanteil N2 Start
+x_NH3_0_plot = 0 #1 Stoffmengenanteil NH3 Start
+
+n_H2_0_plot = n_ges_0_plot * x_H2_0_plot #mol Stoffmenge H2 Start
+n_N2_0_plot = n_ges_0_plot * x_N2_0_plot #mol Stoffmenge N2 Start
+n_NH3_0_plot = n_ges_0_plot * x_NH3_0_plot #mol Stoffmenge NH3 Start
+
+#Diagramm1: Parameter zur Berechnung von xi über T bei versch. Druecken
 T_plot1 = np.linspace(300,500, num = num_plot) #K Temperatur
-p_plot1 = np.array([100, 200, 300]) #bar Druck; umgerechnet xivon atm
-n_ges_0_plot1 = 1 #mol Gesamtstoffmenge Start
-x_H2_0_plot1 = 3/4 #1 Stoffmengenanteil H2 Start
-x_N2_0_plot1 = 1/4 #1 Stoffmengenanteil N2 Start
-x_NH3_0_plot1 = 0 #1 Stoffmengenanteil NH3 Start
-n_H2_0_plot1 = n_ges_0_plot1 * x_H2_0_plot1 #mol Stoffmenge H2 Start
-n_N2_0_plot1 = n_ges_0_plot1 * x_N2_0_plot1 #mol Stoffmenge N2 Start
-n_NH3_0_plot1 = n_ges_0_plot1 * x_NH3_0_plot1 #mol Stoffmenge NH3 Start
+p_plot1 = np.array([100, 200, 300]) #bar Druck;
 
 #Aufrufen der Funktion zur Berechnung von xi mit Shomate
 xi_plot1 = np.zeros((num_plot,len(p_plot1)))
 for i in range(0, len(p_plot1)):
-    xi_plot1[:,i] = GGW(T_plot1,p_plot1[i], n_H2_0_plot1, n_N2_0_plot1, n_NH3_0_plot1)
-#Berechnung der Stoffmengen im Gleichgewicht    
-n_H2 = xi * v_H2 + n_H2_0 # mol Stoffmenge H2 Gleichgewicht
-n_N2 = xi * v_N2 + n_N2_0 # mol Stoffmenge N2 Gleichgewicht
-n_NH3 = xi * v_NH3 + n_NH3_0 # mol Stoffmenge NH3 Gleichgewicht
+    xi_plot1[:,i] = GGW(T_plot1,p_plot1[i], n_H2_0_plot, n_N2_0_plot, n_NH3_0_plot)
 
-# #Berechnete Daten nach Larson
-# T_plot2 = np.array([300, 350, 400, 450, 500])
-# p_plot2 = 100 * 1.01325 #bar Druck; umgerechnet von atm
-# x_NH3_0_plot2 = 0 #mol Stoffmengenanteil NH3 Start
-# x_NH3_plot2 = np.array([52.04, 37.35, 25.12, 16.43, 10.61]) / 100 # 1 Stoffmengenanteil NH3 im GG
-# n_NH3_plot2 = x_NH3_plot2 * n_ges
-# xi_plot2 = (x_NH3_plot2 * 1 - ) / -2
+#Diagramm2: x_NH3 über T; Vergleich Shomate-Daten mit Daten nach Larson
+T_plot2_sh = np.linspace(300,500, num = num_plot) #K Temperatur für Shomate
+T_plot2_vgl = np.array([300, 350, 400, 450, 500]) #K Temperatur für Vergleichsdaten
+p_plot2 = 100 * 1.01325 #bar Druck; umgerechnet von atm
 
+xi_plot2_sh = GGW(T_plot2_sh, p_plot2, n_H2_0_plot, n_N2_0_plot, n_NH3_0_plot)
 
+#Berechnung der Gesamt(stoffmengen) im Gleichgewicht im Shomate    
+n_H2_plot2_sh = xi_plot2_sh * v_H2 + n_H2_0_plot # mol Stoffmenge H2 Gleichgewicht
+n_N2_plot2_sh = xi_plot2_sh * v_N2 + n_N2_0_plot # mol Stoffmenge N2 Gleichgewicht
+n_NH3_plot2_sh = xi_plot2_sh * v_NH3 + n_NH3_0_plot # mol Stoffmenge NH3 Gleichgewicht
+n_ges_plot2_sh = n_H2_plot2_sh + n_N2_plot2_sh + n_NH3_plot2_sh #mol Gesamtstoffmenge Gleichgewicht
+
+#Stofmengenanteile NH3 im GG
+x_NH3_plot2_sh = n_NH3_plot2_sh / n_ges_plot2_sh #Stoffmengenanteil NH3 im GG mit Shomate
+x_NH3_plot2_vgl = np.array([52.04, 37.35, 25.12, 16.43, 10.61]) / 100 # 1 Stoffmengenanteil NH3 im GG; umgerechnet von %
 
 #Diagramme zeichnen
 #Allgemeine Formatierung
@@ -200,7 +205,7 @@ plt.rcParams['axes.linewidth'] = 3 # Dicke Rahmenlinie
 fig1,ax1 = plt.subplots()
 ax1.plot(T_plot1,xi_plot1[:,0],'-', color ='rebeccapurple', label = '$p$ = 100 bar') #Achsen definieren
 ax1.plot(T_plot1, xi_plot1[:,1], '--', color ='teal', label = '$p$ = 200 bar')
-ax1.plot(T_plot1,xi_plot1[:,2],'o-', color ='orange', label = '$p$ = 300 bar')
+ax1.plot(T_plot1,xi_plot1[:,2], ':', color ='orange', label = '$p$ = 300 bar')
 #'o': Punkte;'-': Verbindung mit Linien; '--':gestrichelte Linie...
 #Farbe ändern: b blau; r rot; g grün; y yellow; m magenta; c cyan; schwarz k; w weiß
 ax1.set(xlabel = '$T$ / K', ylabel = '$\\xi$ / 1') #Beschriftung Achsen; Kursiv durch $$; Index durch _{}
@@ -209,12 +214,20 @@ ax1.tick_params(direction = 'in', length = 20, width = 3)
 
 ax1.legend() 
 
+#x_NH3 über T; Vergleich Shomate-Daten mit Larson
+fig2,ax2 = plt.subplots()
+ax2.plot(T_plot2_sh,x_NH3_plot2_sh, '-', color ='rebeccapurple', label = 'Shomate')
+ax2.plot(T_plot2_vgl,x_NH3_plot2_vgl, 'o', color ='teal', label = 'Larson', markersize = 15)
+ax2.set(xlabel = '$T$ / K', ylabel = '$x\mathregular{_{NH_3}}$ / 1') #Beschriftung Achsen; Kursiv durch $$; Index durch _{}
+ax2.set(xlim=(T_plot2_sh[0],T_plot2_sh[-1]))
+ax2.tick_params(direction = 'in', length = 20, width = 3)
 
-# fig2,ax2 = plt.subplots()
-# ax2.plot(T_plot1,x_NH3_plot1)
+ax2.legend() 
 
-# plt.tight_layout()
-# plt.show() #Anzeigen des Diagramms
+
+plt.tight_layout()
+#Anzeigen der Diagramme
+plt.show()
 
 
 # #Standardreaktionsentropie delta_R_S_0
