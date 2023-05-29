@@ -3,6 +3,7 @@
 #Importe / Bibliotheken
 import numpy as np
 from scipy.optimize import root
+import matplotlib.pyplot as plt
 
 
 #Stoechiometrische Koeffizienten Ammoniaksynthese
@@ -22,7 +23,7 @@ NH3 = index[2]
 R = 8.31448 # J mol^-1 K^-1 Ideale Gaskonstane
 p_0 = 1 # bar Standarddruck
 
-# Parameter
+#Parameter
 num = 1000 # Anzahl der Werte im Vektor
 
 T = np.random.uniform(600,800 + 1,num) # K Temperatur
@@ -127,15 +128,22 @@ def GGW(T, p, n_H2_0, n_N2_0, n_NH3_0):
 
     #Bestimmung Startwert
     xi_0 = (-0.5 * n_NH3_0 + min(n_N2_0, 1/3 * n_H2_0)) / 2
+    xi_0 = np.full_like(K_x, xi_0)
 
     #Lösung Polynom
     sol = root(fun, xi_0)
     xi = sol.x # mol Reaktionslaufzahl
     
+    # #Kontrolle: physikalisch moegliche Loesung?
+    # if xi < (-0.5 * n_NH3_0) or xi > min(n_N2_0, 1/3 * n_H2_0):
+    #     #Fehlermeldung
+    #     raise Warning("Impossible value for xi.")
+    
     #Kontrolle: physikalisch moegliche Loesung?
-    if xi < (-0.5 * n_NH3_0) or xi > min(n_N2_0, 1/3 * n_H2_0):
-        #Fehlermeldung
-        raise Warning("Impossible value for xi.")
+    for i in range(0, len(xi)):
+        if xi[i] < (-0.5 * n_NH3_0) or xi[i] > min(n_N2_0, 1/3 * n_H2_0):
+            #Fehlermeldung
+            raise Warning("Impossible value for xi.")   
     
     return(xi)
 
@@ -143,11 +151,70 @@ def GGW(T, p, n_H2_0, n_N2_0, n_NH3_0):
 xi = np.zeros(len(n_H2_0))
 for i in range(0, len(n_H2_0)):
     xi[i] = GGW(T[i], p[i], n_H2_0[i], n_N2_0[i], n_NH3_0[i])
-    #Berechnung der Stoffmengen im Gleichgewicht
-    
+
+#Berechnung der Stoffmengen im Gleichgewicht    
 n_H2 = xi * v_H2 + n_H2_0 # mol Stoffmenge H2 Gleichgewicht
 n_N2 = xi * v_N2 + n_N2_0 # mol Stoffmenge N2 Gleichgewicht
 n_NH3 = xi * v_NH3 + n_NH3_0 # mol Stoffmenge NH3 Gleichgewicht
+
+#Plots
+#Diagramm1: Parameter zur Berechnung von xi über T bei versch. Druecken
+num_plot = 50 #Anzahl der berechneten Punkte
+T_plot1 = np.linspace(300,500, num = num_plot) #K Temperatur
+p_plot1 = np.array([100, 200, 300]) #bar Druck; umgerechnet xivon atm
+n_ges_0_plot1 = 1 #mol Gesamtstoffmenge Start
+x_H2_0_plot1 = 3/4 #1 Stoffmengenanteil H2 Start
+x_N2_0_plot1 = 1/4 #1 Stoffmengenanteil N2 Start
+x_NH3_0_plot1 = 0 #1 Stoffmengenanteil NH3 Start
+n_H2_0_plot1 = n_ges_0_plot1 * x_H2_0_plot1 #mol Stoffmenge H2 Start
+n_N2_0_plot1 = n_ges_0_plot1 * x_N2_0_plot1 #mol Stoffmenge N2 Start
+n_NH3_0_plot1 = n_ges_0_plot1 * x_NH3_0_plot1 #mol Stoffmenge NH3 Start
+
+#Aufrufen der Funktion zur Berechnung von xi mit Shomate
+xi_plot1 = np.zeros((num_plot,len(p_plot1)))
+for i in range(0, len(p_plot1)):
+    xi_plot1[:,i] = GGW(T_plot1,p_plot1[i], n_H2_0_plot1, n_N2_0_plot1, n_NH3_0_plot1)
+#Berechnung der Stoffmengen im Gleichgewicht    
+n_H2 = xi * v_H2 + n_H2_0 # mol Stoffmenge H2 Gleichgewicht
+n_N2 = xi * v_N2 + n_N2_0 # mol Stoffmenge N2 Gleichgewicht
+n_NH3 = xi * v_NH3 + n_NH3_0 # mol Stoffmenge NH3 Gleichgewicht
+
+# #Berechnete Daten nach Larson
+# T_plot2 = np.array([300, 350, 400, 450, 500])
+# p_plot2 = 100 * 1.01325 #bar Druck; umgerechnet von atm
+# x_NH3_0_plot2 = 0 #mol Stoffmengenanteil NH3 Start
+# x_NH3_plot2 = np.array([52.04, 37.35, 25.12, 16.43, 10.61]) / 100 # 1 Stoffmengenanteil NH3 im GG
+# n_NH3_plot2 = x_NH3_plot2 * n_ges
+# xi_plot2 = (x_NH3_plot2 * 1 - ) / -2
+
+
+
+#Diagramme zeichnen
+#Allgemeine Formatierung
+plt.rc('font', size = 40) # Schriftgroesse
+plt.rc('lines', linewidth = 7) # Linienstaerke
+plt.rcParams['axes.linewidth'] = 3 # Dicke Rahmenlinie
+
+
+#xi über T bei unterschiedlichen p
+fig1,ax1 = plt.subplots()
+ax1.plot(T_plot1,xi_plot1[:,0],'-', color ='rebeccapurple', label = '$p$ = 100 bar') #Achsen definieren
+ax1.plot(T_plot1, xi_plot1[:,1], '--', color ='teal', label = '$p$ = 200 bar')
+ax1.plot(T_plot1,xi_plot1[:,2],'o-', color ='orange', label = '$p$ = 300 bar')
+#'o': Punkte;'-': Verbindung mit Linien; '--':gestrichelte Linie...
+#Farbe ändern: b blau; r rot; g grün; y yellow; m magenta; c cyan; schwarz k; w weiß
+ax1.set(xlabel = '$T$ / K', ylabel = '$\\xi$ / 1') #Beschriftung Achsen; Kursiv durch $$; Index durch _{}
+ax1.set(xlim=(T_plot1[0],T_plot1[-1]))
+ax1.tick_params(direction = 'in', length = 20, width = 3)
+
+ax1.legend() 
+
+
+# fig2,ax2 = plt.subplots()
+# ax2.plot(T_plot1,x_NH3_plot1)
+
+# plt.tight_layout()
+# plt.show() #Anzeigen des Diagramms
 
 
 # #Standardreaktionsentropie delta_R_S_0
