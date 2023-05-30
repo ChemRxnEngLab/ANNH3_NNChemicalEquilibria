@@ -35,82 +35,74 @@ x_0 = np.random.dirichlet((1,1,1),num) # 1 Stoffmengenanteile zu Reaktionsbeginn
 n_H2_0 = x_0[:,0] * n_ges_0 # mol Stoffmenge H2 Start
 n_N2_0 = x_0[:,1] * n_ges_0 # mol Stoffmenge N2 Start
 n_NH3_0 = x_0[:,2] * n_ges_0 # mol Stoffmenge NH3 Start
-
-#Shomate Koeffizienten; NIST; [H2, N2, NH3]
-A = np.array([33.066178,28.98641,19.99563])
-B = np.array([-11.363417,1.853978,49.77119])
-C = np.array([11.432816,-9.647459,-15.37599])
-D= np.array([-2.772874,16.63537	,1.921168])
-E = np.array([-0.158558,0.000117,0.189174])
-F = np.array([-9.980797,-8.671914,-53.30667])
-G = np.array([172.707974,226.4168,203.8591])
-H = np.array([0.0,0.0,-45.89806])
-# A = np.zeros((num,3))
-# B = C = D = E = F = G = H = np.zeros((num))
-# for i in range(0,num-1):
-#     if T[i] < 298:
-#         raise Warning ("No data for this temperature available.")
-#     elif T[i] < 500:
-#         A = np.append(A,[[33.066178],[28.98641],[19.99563]],axis=0)
-#         B[i] = np.array([-11.363417,1.853978,49.77119])
-#         C[i] = np.array([11.432816,-9.647459,-15.37599])
-#         D[i] = np.array([-2.772874,16.63537	,1.921168])
-#         E[i] = np.array([-0.158558,0.000117,0.189174])
-#         F[i] = np.array([-9.980797,-8.671914,-53.30667])
-#         G[i] = np.array([172.707974,226.4168,203.8591])
-#         H[i] = np.array([0.0,0.0,-45.89806])
-#     elif T < 1000:
-#         A[i] = np.array([33.066178,19.50583,19.99563])
-#         B[i] = np.array([-11.363417,19.88705,49.77119])
-#         C[i] = np.array([11.432816,-8.598535,-15.37599])
-#         D[i] = np.array([-2.772874,1.369784	,1.921168])
-#         E[i] = np.array([-0.158558,0.527601,0.189174])
-#         F[i] = np.array([-9.980797,-4.935202,-53.30667])
-#         G[i] = np.array([172.707974,212.3900,203.8591])
-#         H[i] = np.array([0.0,0.0,-45.89806])
-#     elif T < 1400:
-#         A[i] = np.array([18.563083,19.50583,19.99563])
-#         B[i] = np.array([12.257357,19.88705,49.77119])
-#         C[i] = np.array([-2.859786,-8.598535,-15.37599])
-#         D[i] = np.array([0.268238,1.369784	,1.921168])
-#         E[i] = np.array([1.977990,0.527601,0.189174])
-#         F[i] = np.array([-1.147438,-4.935202,-53.30667])
-#         G[i] = np.array([156.288133,212.3900,203.8591])
-#         H[i] = np.array([0.0,0.0,-45.89806])
-#     else:
-#         raise Warning ("Temperature is too high.")
+        
 #Standardbildungsenthalpie delta_f_H_0_ref; NIST; [H2, N2, NH3]
 delta_f_H_0_ref = np.array([0.0, 0.0, -45.90]) # kJ mol^-1
 
 #Shomate-Gleichungen
-def shomate_S (T, stoff):
+def shomate_S (T, stoff, A, B, C, D, E, F, G, H):
     t = T / 1000
     S = A[stoff] * np.log(t) + B[stoff] * t + C[stoff] * t**2 / 2 + D[stoff] * t**3 / 3 - E[stoff] /(2 * t**2) + G[stoff]
     return S
 
-def shomate_H (T, stoff):
+def shomate_H (T, stoff, A, B, C, D, E, F, G, H):
     t = T / 1000
     H_0 = A[stoff] * t + B[stoff] * t**2 / 2 + C[stoff] * t**3 / 3 + D[stoff] * t**4 / 4 - E[stoff] / t + F[stoff] - H[stoff] + delta_f_H_0_ref[stoff] 
     return H_0
 
 #Standardbildungsenthalpie delta_f_H_0
-def delta_f_H_0(T, stoff):
+def delta_f_H_0(T, stoff, A, B, C, D, E, F, G, H):
     #N2 oder H2 --> Standardbildungsenthalpie == 0
     if stoff != 2:
         delta_f_H_0 = 0.0
     #NH3 Berechnung der Standardbildungsenthalpie aus Shomate-Enthalpie
     else:
-        delta_f_H_0 = (v_NH3 / v_NH3) * shomate_H(T, NH3) + (v_N2 / v_NH3) * shomate_H(T,N2) + (v_H2 / v_NH3) * shomate_H(T,H2)
+        delta_f_H_0 = (v_NH3 / v_NH3) * shomate_H(T, NH3, A, B, C, D, E, F, G, H) + (v_N2 / v_NH3) * shomate_H(T,N2, A, B, C, D, E, F, G, H) + (v_H2 / v_NH3) * shomate_H(T,H2, A, B, C, D, E, F, G, H)
     return delta_f_H_0
 
 #Gleichgewichtsberechnung
 def GGW(T, p, n_H2_0, n_N2_0, n_NH3_0):
+
+    #Shomate Koeffizienten; NIST; [H2, N2, NH3]
+    for i in range(0,num):
+        if T < 298:
+            raise Warning ("No data for this temperature available.")
+        elif T < 500:
+            A = np.array([33.066178,28.98641,19.99563])
+            B = np.array([-11.363417,1.853978,49.77119])
+            C = np.array([11.432816,-9.647459,-15.37599])
+            D = np.array([-2.772874,16.63537	,1.921168])
+            E = np.array([-0.158558,0.000117,0.189174])
+            F = np.array([-9.980797,-8.671914,-53.30667])
+            G = np.array([172.707974,226.4168,203.8591])
+            H = np.array([0.0,0.0,-45.89806])
+        elif T < 1000:
+            A = np.array([33.066178,19.50583,19.99563])
+            B = np.array([-11.363417,19.88705,49.77119])
+            C = np.array([11.432816,-8.598535,-15.37599])
+            D = np.array([-2.772874,1.369784	,1.921168])
+            E = np.array([-0.158558,0.527601,0.189174])
+            F = np.array([-9.980797,-4.935202,-53.30667])
+            G = np.array([172.707974,212.3900,203.8591])
+            H = np.array([0.0,0.0,-45.89806])
+        elif T < 1400:
+            A = np.array([18.563083,19.50583,19.99563])
+            B = np.array([12.257357,19.88705,49.77119])
+            C = np.array([-2.859786,-8.598535,-15.37599])
+            D = np.array([0.268238,1.369784	,1.921168])
+            E = np.array([1.977990,0.527601,0.189174])
+            F = np.array([-1.147438,-4.935202,-53.30667])
+            G = np.array([156.288133,212.3900,203.8591])
+            H = np.array([0.0,0.0,-45.89806])
+        else:
+            raise Warning ("Temperature is too high.")
+    
     
     #Standardreaktionsenthalpie delta_R_H_0
-    delta_R_H_0 = (v_H2 * delta_f_H_0(T,H2) + v_N2 * delta_f_H_0(T, N2) + v_NH3 * delta_f_H_0(T,NH3)) * 1000 # J mol^-1
+    delta_R_H_0 = (v_H2 * delta_f_H_0(T,H2, A, B, C, D, E, F, G, H) + v_N2 * delta_f_H_0(T, N2, A, B, C, D, E, F, G, H) + v_NH3 * delta_f_H_0(T,NH3, A, B, C, D, E, F, G, H)) * 1000 # J mol^-1
     
     #Standardreaktionsentropie delta_R_S_0
-    delta_R_S_0 = v_H2 * shomate_S(T, H2) + v_N2 * shomate_S(T, N2) + v_NH3 * shomate_S(T, NH3) # J mol^-1 K^-1
+    delta_R_S_0 = v_H2 * shomate_S(T, H2, A, B, C, D, E, F, G, H) + v_N2 * shomate_S(T, N2, A, B, C, D, E, F, G, H) + v_NH3 * shomate_S(T, NH3, A, B, C, D, E, F, G, H) # J mol^-1 K^-1
     
     #freie Standard Reaktionsenthalpie delta_R_G_0
     delta_R_G_0 = delta_R_H_0 - T * delta_R_S_0 # J mol^-1
@@ -128,22 +120,23 @@ def GGW(T, p, n_H2_0, n_N2_0, n_NH3_0):
 
     #Bestimmung Startwert
     xi_0 = (-0.5 * n_NH3_0 + min(n_N2_0, 1/3 * n_H2_0)) / 2
-    xi_0 = np.full_like(K_x, xi_0)
+    #xi_0 = np.full_like(K_x, xi_0) # bei Uebergabe T_array
 
     #Lösung Polynom
     sol = root(fun, xi_0)
     xi = sol.x # mol Reaktionslaufzahl
     
-    # #Kontrolle: physikalisch moegliche Loesung?
-    # if xi < (-0.5 * n_NH3_0) or xi > min(n_N2_0, 1/3 * n_H2_0):
-    #     #Fehlermeldung
-    #     raise Warning("Impossible value for xi.")
-    
     #Kontrolle: physikalisch moegliche Loesung?
-    for i in range(0, len(xi)):
-        if xi[i] < (-0.5 * n_NH3_0) or xi[i] > min(n_N2_0, 1/3 * n_H2_0):
-            #Fehlermeldung
-            raise Warning("Impossible value for xi.")   
+    if xi < (-0.5 * n_NH3_0) or xi > min(n_N2_0, 1/3 * n_H2_0):
+        #Fehlermeldung
+        raise Warning("Impossible value for xi.")
+    
+    ## für Uebergabe von T_array 
+    ##Kontrolle: physikalisch moegliche Loesung?
+    # for i in range(0, len(xi)):
+    #     if xi[i] < (-0.5 * n_NH3_0) or xi[i] > min(n_N2_0, 1/3 * n_H2_0):
+    #         #Fehlermeldung
+    #         raise Warning("Impossible value for xi.")   
     
     return(xi)
 
@@ -175,14 +168,17 @@ p_plot1 = np.array([100, 200, 300]) #bar Druck;
 #Aufrufen der Funktion zur Berechnung von xi mit Shomate
 xi_plot1 = np.zeros((num_plot,len(p_plot1)))
 for i in range(0, len(p_plot1)):
-    xi_plot1[:,i] = GGW(T_plot1,p_plot1[i], n_H2_0_plot, n_N2_0_plot, n_NH3_0_plot)
+    for j in range(0, len(T_plot1)):
+        xi_plot1[j,i] = GGW(T_plot1[j],p_plot1[i], n_H2_0_plot, n_N2_0_plot, n_NH3_0_plot)
 
 #Diagramm2: x_NH3 über T; Vergleich Shomate-Daten mit Daten nach Larson
 T_plot2_sh = np.linspace(300,500, num = num_plot) #K Temperatur für Shomate
 T_plot2_vgl = np.array([300, 350, 400, 450, 500]) #K Temperatur für Vergleichsdaten
 p_plot2 = 100 * 1.01325 #bar Druck; umgerechnet von atm
 
-xi_plot2_sh = GGW(T_plot2_sh, p_plot2, n_H2_0_plot, n_N2_0_plot, n_NH3_0_plot)
+xi_plot2_sh = np.zeros(len(T_plot2_sh))
+for i in range(0, len(T_plot2_sh)):
+    xi_plot2_sh[i] = GGW(T_plot2_sh[i], p_plot2, n_H2_0_plot, n_N2_0_plot, n_NH3_0_plot)
 
 #Berechnung der Gesamt(stoffmengen) im Gleichgewicht im Shomate    
 n_H2_plot2_sh = xi_plot2_sh * v_H2 + n_H2_0_plot # mol Stoffmenge H2 Gleichgewicht
