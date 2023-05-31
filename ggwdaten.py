@@ -162,7 +162,7 @@ n_N2_0_plot = n_ges_0_plot * x_N2_0_plot #mol Stoffmenge N2 Start
 n_NH3_0_plot = n_ges_0_plot * x_NH3_0_plot #mol Stoffmenge NH3 Start
 
 #Diagramm1: Parameter zur Berechnung von xi über T bei versch. Druecken
-T_plot1 = np.linspace(300,500, num = num_plot) #K Temperatur
+T_plot1 = np.linspace(300,1300, num = num_plot) #K Temperatur
 p_plot1 = np.array([100, 200, 300]) #bar Druck;
 
 #Aufrufen der Funktion zur Berechnung von xi mit Shomate
@@ -172,8 +172,8 @@ for i in range(0, len(p_plot1)):
         xi_plot1[j,i] = GGW(T_plot1[j],p_plot1[i], n_H2_0_plot, n_N2_0_plot, n_NH3_0_plot)
 
 #Diagramm2: x_NH3 über T; Vergleich Shomate-Daten mit Daten nach Larson
-T_plot2_sh = np.linspace(300,500, num = num_plot) #K Temperatur für Shomate
-T_plot2_vgl = np.array([300, 350, 400, 450, 500]) #K Temperatur für Vergleichsdaten
+T_plot2_sh = np.linspace(520, 800, num = num_plot) #K Temperatur für Shomate
+T_plot2_vgl = np.array([300, 350, 400, 450, 500]) + 273.15 #K Temperatur für Vergleichsdaten; umrechnung von °C
 p_plot2 = 100 * 1.01325 #bar Druck; umgerechnet von atm
 
 xi_plot2_sh = np.zeros(len(T_plot2_sh))
@@ -205,26 +205,29 @@ ax1.plot(T_plot1,xi_plot1[:,2], ':', color ='orange', label = '$p$ = 300 bar')
 #'o': Punkte;'-': Verbindung mit Linien; '--':gestrichelte Linie...
 #Farbe ändern: b blau; r rot; g grün; y yellow; m magenta; c cyan; schwarz k; w weiß
 ax1.set(xlabel = '$T$ / K', ylabel = '$\\xi$ / 1') #Beschriftung Achsen; Kursiv durch $$; Index durch _{}
-ax1.set(xlim=(T_plot1[0],T_plot1[-1]))
+ax1.set(xlim=(T_plot1[0],T_plot1[-1]), ylim=(0, 0.25))
 ax1.tick_params(direction = 'in', length = 20, width = 3)
 
-ax1.legend() 
+leg1 = ax1.legend() #Legende anzeigen
+leg1.get_frame().set_edgecolor('k') #schwarzer Kasten um Legende 
+leg1.get_frame().set_linewidth(3) #Linienstärke Kasten um Legende
+
 
 #x_NH3 über T; Vergleich Shomate-Daten mit Larson
 fig2,ax2 = plt.subplots()
-ax2.plot(T_plot2_sh,x_NH3_plot2_sh, '-', color ='rebeccapurple', label = 'Shomate')
-ax2.plot(T_plot2_vgl,x_NH3_plot2_vgl, 'o', color ='teal', label = 'Larson', markersize = 15)
+ax2.plot(T_plot2_sh,x_NH3_plot2_sh, '-', color ='rebeccapurple', label = 'Shomate', linewidth = 5)
+ax2.plot(T_plot2_vgl,x_NH3_plot2_vgl, 'o', color ='orange', label = 'Larson', markersize = 15)
 ax2.set(xlabel = '$T$ / K', ylabel = '$x\mathregular{_{NH_3}}$ / 1') #Beschriftung Achsen; Kursiv durch $$; Index durch _{}
-ax2.set(xlim=(T_plot2_sh[0],T_plot2_sh[-1]))
+ax2.set(xlim=(T_plot2_sh[0],T_plot2_sh[-1]), ylim=(0, 0.6))
 ax2.tick_params(direction = 'in', length = 20, width = 3)
 
-ax2.legend() 
-
+leg2 = ax2.legend() #Legende anzeigen
+leg2.get_frame().set_edgecolor('k') #schwarzer Kasten um Legende 
+leg2.get_frame().set_linewidth(3) #Linienstärke Kasten um Legende
 
 plt.tight_layout()
 #Anzeigen der Diagramme
 plt.show()
-
 
 # #Standardreaktionsentropie delta_R_S_0
 # delta_R_S_0 = np.zeros(len(T_array))
