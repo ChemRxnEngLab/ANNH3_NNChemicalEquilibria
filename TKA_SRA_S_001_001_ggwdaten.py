@@ -26,7 +26,7 @@ p_0 = 1 # bar Standarddruck
 #Parameter
 num = 1000 # Anzahl der Werte im Vektor
 
-T = np.random.uniform(600,800 + 1,num) # K Temperatur
+T = np.random.uniform(650,850 + 1,num) # K Temperatur
 p = np.random.uniform(100,250 + 1,num) # bar Druck
 
 #Stofffmengen zu Reaktionsbeginn
@@ -37,7 +37,7 @@ n_N2_0 = x_0[:,1] * n_ges_0 # mol Stoffmenge N2 Start
 n_NH3_0 = x_0[:,2] * n_ges_0 # mol Stoffmenge NH3 Start
         
 #Standardbildungsenthalpie delta_f_H_0_ref; NIST; [H2, N2, NH3]
-delta_f_H_0_ref = np.array([0.0, 0.0, -45.90]) # kJ mol^-1
+delta_f_H_0_ref = np.array([0.0, 0.0, -45.90]) # kJ mol^-1 Standardtemperatur
 
 #Shomate-Gleichungen
 def shomate_S (T, stoff, A, B, C, D, E, F, G, H):
@@ -163,7 +163,7 @@ n_NH3_0_plot = n_ges_0_plot * x_NH3_0_plot #mol Stoffmenge NH3 Start
 
 #Diagramm1: Parameter zur Berechnung von xi über T bei versch. Druecken
 T_plot1 = np.linspace(300,1300, num = num_plot) #K Temperatur
-p_plot1 = np.array([100, 200, 300]) #bar Druck;
+p_plot1 = np.array([50, 200, 500]) #bar Druck;
 
 #Aufrufen der Funktion zur Berechnung von xi mit Shomate
 xi_plot1 = np.zeros((num_plot,len(p_plot1)))
@@ -199,9 +199,9 @@ plt.rcParams['axes.linewidth'] = 3 # Dicke Rahmenlinie
 
 #xi über T bei unterschiedlichen p
 fig1,ax1 = plt.subplots()
-ax1.plot(T_plot1,xi_plot1[:,0],'-', color ='rebeccapurple', label = '$p$ = 100 bar') #Achsen definieren
+ax1.plot(T_plot1,xi_plot1[:,0],'-', color ='rebeccapurple', label = '$p$ = 50 bar') #Achsen definieren
 ax1.plot(T_plot1, xi_plot1[:,1], '--', color ='teal', label = '$p$ = 200 bar')
-ax1.plot(T_plot1,xi_plot1[:,2], ':', color ='orange', label = '$p$ = 300 bar')
+ax1.plot(T_plot1,xi_plot1[:,2], ':', color ='orange', label = '$p$ = 500 bar')
 #'o': Punkte;'-': Verbindung mit Linien; '--':gestrichelte Linie...
 #Farbe ändern: b blau; r rot; g grün; y yellow; m magenta; c cyan; schwarz k; w weiß
 ax1.set(xlabel = '$T$ / K', ylabel = '$\\xi$ / 1') #Beschriftung Achsen; Kursiv durch $$; Index durch _{}
