@@ -150,6 +150,9 @@ n_H2 = xi * v_H2 + n_H2_0 # mol Stoffmenge H2 Gleichgewicht
 n_N2 = xi * v_N2 + n_N2_0 # mol Stoffmenge N2 Gleichgewicht
 n_NH3 = xi * v_NH3 + n_NH3_0 # mol Stoffmenge NH3 Gleichgewicht
 
+#Speichern der GGW Daten
+np.savez("data/eq_dataset.npz", T = T, p = p, x_0 = x_0, xi = xi)
+
 #Plots
 num_plot = 50 #Anzahl der berechneten Punkte
 n_ges_0_plot = 1 #mol Gesamtstoffmenge Start
