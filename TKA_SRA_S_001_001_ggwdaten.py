@@ -24,7 +24,7 @@ R = 8.31448 # J mol^-1 K^-1 Ideale Gaskonstane
 p_0 = 1 # bar Standarddruck
 
 #Parameter
-num = 1000 # Anzahl der Werte im Vektor
+num = 10000 # Anzahl der Werte im Vektor
 
 T = np.random.uniform(650,850 + 1,num) # K Temperatur
 p = np.random.uniform(100,250 + 1,num) # bar Druck
@@ -209,7 +209,7 @@ ax1.plot(T_plot1, xi_plot1[:,1], '--', color ='teal', label = '$p$ = 200 bar')
 ax1.plot(T_plot1,xi_plot1[:,2], ':', color ='orange', label = '$p$ = 500 bar')
 #'o': Punkte;'-': Verbindung mit Linien; '--':gestrichelte Linie...
 #Farbe ändern: b blau; r rot; g grün; y yellow; m magenta; c cyan; schwarz k; w weiß
-ax1.set(xlabel = '$T$ / K', ylabel = '$\\xi$ / 1') #Beschriftung Achsen; Kursiv durch $$; Index durch _{}
+ax1.set(xlabel = '$T$ / K', ylabel = '$\\xi$ / mol') #Beschriftung Achsen; Kursiv durch $$; Index durch _{}
 ax1.set(xlim=(T_plot1[0],T_plot1[-1]), ylim=(0, 0.25))
 ax1.tick_params(direction = 'in', length = 20, width = 3)
 
