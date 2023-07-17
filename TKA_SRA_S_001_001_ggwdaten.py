@@ -24,7 +24,7 @@ R = 8.31448 # J mol^-1 K^-1 Ideale Gaskonstane
 p_0 = 1 # bar Standarddruck
 
 #Parameter
-num = 10000 # Anzahl der Werte im Vektor
+num = 1000 # Anzahl der Werte im Vektor
 
 T = np.random.uniform(650,850 + 1,num) # K Temperatur
 p = np.random.uniform(100,250 + 1,num) # bar Druck
@@ -149,10 +149,13 @@ for i in range(0, len(n_H2_0)):
 n_H2 = xi * v_H2 + n_H2_0 # mol Stoffmenge H2 Gleichgewicht
 n_N2 = xi * v_N2 + n_N2_0 # mol Stoffmenge N2 Gleichgewicht
 n_NH3 = xi * v_NH3 + n_NH3_0 # mol Stoffmenge NH3 Gleichgewicht
+n_ges = n_H2 + n_N2 + n_NH3 # mol Gesamtstoffmenge Gleichgewicht
+x = (np.array([n_H2, n_N2, n_NH3]) / n_ges).T # 1 Stoffmengenanteile im Gleichgewicht
 
 #Speichern der GGW Daten
 #np.savez("data/eq_dataset.npz", T = T, p = p, x_H2_0 = x_0[:,0], x_N2_0 = x_0[:,1], x_NH3_0 = x_0[:,2], xi = xi)
 #np.savez("data/eq_dataset.npz", T = T, p = p, x_0 = x_0, xi = xi)
+#np.savez("data/eq_dataset_x_10000.npz", T = T, p = p, x_0 = x_0, x = x)
 
 
 #Plots
