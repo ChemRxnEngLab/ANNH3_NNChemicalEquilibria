@@ -4,6 +4,10 @@
 import numpy as np
 from scipy.optimize import root
 import matplotlib.pyplot as plt
+import time
+
+#Bestimmung der Laufzeit für die GGW-Berechnung
+start_time = time.process_time()
 
 
 #Stoechiometrische Koeffizienten Ammoniaksynthese
@@ -24,7 +28,7 @@ R = 8.31448 # J mol^-1 K^-1 Ideale Gaskonstane
 p_0 = 1 # bar Standarddruck
 
 #Parameter
-num = 20000 # Anzahl der Werte im Vektor
+num = 1000 # Anzahl der Werte im Vektor
 
 T = np.random.uniform(650,850 + 1,num) # K Temperatur
 p = np.random.uniform(100,250 + 1,num) # bar Druck
@@ -156,9 +160,10 @@ x = (np.array([n_H2, n_N2, n_NH3]) / n_ges).T # 1 Stoffmengenanteile im Gleichge
 #np.savez("data/eq_dataset.npz", T = T, p = p, x_H2_0 = x_0[:,0], x_N2_0 = x_0[:,1], x_NH3_0 = x_0[:,2], xi = xi)
 #np.savez("data/eq_dataset.npz", T = T, p = p, x_0 = x_0, xi = xi)
 #np.savez("data/eq_dataset_x_10000.npz", T = T, p = p, x_0 = x_0, x = x)
-np.savez("data/eq_dataset_x_20000.npz", T = T, p = p, x_0 = x_0, x = x)
+#np.savez("data/eq_dataset_x_hndtsd.npz", T = T, p = p, x_0 = x_0, x = x)
 
-
+#Ende der Laufzeit für die Berechnung
+calc_time = time.process_time() - start_time
 
 #Plots
 num_plot = 50 #Anzahl der berechneten Punkte
@@ -199,6 +204,9 @@ n_ges_plot2_sh = n_H2_plot2_sh + n_N2_plot2_sh + n_NH3_plot2_sh #mol Gesamtstoff
 #Stofmengenanteile NH3 im GG
 x_NH3_plot2_sh = n_NH3_plot2_sh / n_ges_plot2_sh #Stoffmengenanteil NH3 im GG mit Shomate
 x_NH3_plot2_vgl = np.array([52.04, 37.35, 25.12, 16.43, 10.61]) / 100 # 1 Stoffmengenanteil NH3 im GG; umgerechnet von %
+
+np.savez("data/eq_dataset_T_var.npz", T = T_plot2_sh, p = np.full_like(T_plot2_sh, p_plot2), x_0 = [x_H2_0_plot, x_N2_0_plot, x_NH3_0_plot], x = x_NH3_plot2_sh)
+
 
 #Diagramme zeichnen
 #Allgemeine Formatierung
