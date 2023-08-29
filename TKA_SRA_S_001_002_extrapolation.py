@@ -4,10 +4,6 @@
 import numpy as np
 from scipy.optimize import root
 import matplotlib.pyplot as plt
-import time
-
-#Bestimmung der Laufzeit für die GGW-Berechnung
-start_time = time.process_time()
 
 
 #Stoechiometrische Koeffizienten Ammoniaksynthese
@@ -30,8 +26,8 @@ p_0 = 1 # bar Standarddruck
 #Parameter
 num = 1000 # Anzahl der Werte im Vektor
 
-T = np.random.uniform(650,850 + 1,num) # K Temperatur
-p = np.random.uniform(100,250 + 1,num) # bar Druck
+T = np.random.uniform(500,650 + 1,num) # K Temperatur
+p = np.random.uniform(10,80 + 1,num) # bar Druck
 
 #Stofffmengen zu Reaktionsbeginn
 n_ges_0 = 1 # mol Gesamtstoffmenge zum Reaktionsbeginn
@@ -160,13 +156,14 @@ x = (np.array([n_H2, n_N2, n_NH3]) / n_ges).T # 1 Stoffmengenanteile im Gleichge
 #np.savez("data/eq_dataset.npz", T = T, p = p, x_H2_0 = x_0[:,0], x_N2_0 = x_0[:,1], x_NH3_0 = x_0[:,2], xi = xi)
 #np.savez("data/eq_dataset.npz", T = T, p = p, x_0 = x_0, xi = xi)
 #np.savez("data/eq_dataset_x_10000.npz", T = T, p = p, x_0 = x_0, x = x)
-#np.savez("data/eq_dataset_x_hndtsd.npz", T = T, p = p, x_0 = x_0, x = x)
+#np.savez("data/eq_dataset_x_20000.npz", T = T, p = p, x_0 = x_0, x = x)
+#np.savez("data/eq_dataset_x_extra.npz", T = T, p = p, x_0 = x_0, x = x)
+np.savez("data/eq_dataset_x_extra_haber.npz", T = T, p = p, x_0 = x_0, x = x)
 
-#Ende der Laufzeit für die Berechnung
-calc_time = time.process_time() - start_time
+
 
 #Plots
-num_plot = 50 #Anzahl der berechneten Punkte
+num_plot = 100 #Anzahl der berechneten Punkte
 n_ges_0_plot = 1 #mol Gesamtstoffmenge Start
 x_H2_0_plot = 3/4 #1 Stoffmengenanteil H2 Start
 x_N2_0_plot = 1/4 #1 Stoffmengenanteil N2 Start
@@ -178,7 +175,7 @@ n_NH3_0_plot = n_ges_0_plot * x_NH3_0_plot #mol Stoffmenge NH3 Start
 
 #Diagramm1: Parameter zur Berechnung von xi über T bei versch. Druecken
 T_plot1 = np.linspace(300,1300, num = num_plot) #K Temperatur
-p_plot1 = np.array([50, 200, 500]) #bar Druck;
+p_plot1 = np.array([50, 100, 200]) #bar Druck;
 
 #Aufrufen der Funktion zur Berechnung von xi mit Shomate
 xi_plot1 = np.zeros((num_plot,len(p_plot1)))
@@ -187,9 +184,8 @@ for i in range(0, len(p_plot1)):
         xi_plot1[j,i] = GGW(T_plot1[j],p_plot1[i], n_H2_0_plot, n_N2_0_plot, n_NH3_0_plot)
 
 #Diagramm2: x_NH3 über T; Vergleich Shomate-Daten mit Daten nach Larson
-T_plot2_sh = np.linspace(520, 800, num = num_plot) #K Temperatur für Shomate
-T_plot2_vgl = np.array([300, 350, 400, 450, 500]) + 273.15 #K Temperatur für Vergleichsdaten; umrechnung von °C
-p_plot2 = 100 * 1.01325 #bar Druck; umgerechnet von atm
+T_plot2_sh = np.linspace(500, 1000, num = num_plot) #K Temperatur für Shomate
+p_plot2 = np.array([50, 100, 200]) #bar Druck
 
 xi_plot2_sh = np.zeros(len(T_plot2_sh))
 for i in range(0, len(T_plot2_sh)):
@@ -203,10 +199,6 @@ n_ges_plot2_sh = n_H2_plot2_sh + n_N2_plot2_sh + n_NH3_plot2_sh #mol Gesamtstoff
 
 #Stofmengenanteile NH3 im GG
 x_NH3_plot2_sh = n_NH3_plot2_sh / n_ges_plot2_sh #Stoffmengenanteil NH3 im GG mit Shomate
-x_NH3_plot2_vgl = np.array([52.04, 37.35, 25.12, 16.43, 10.61]) / 100 # 1 Stoffmengenanteil NH3 im GG; umgerechnet von %
-
-np.savez("data/eq_dataset_T_var.npz", T = T_plot2_sh, p = np.full_like(T_plot2_sh, p_plot2), x_0 = [x_H2_0_plot, x_N2_0_plot, x_NH3_0_plot], x = x_NH3_plot2_sh)
-
 
 #Diagramme zeichnen
 #Allgemeine Formatierung
@@ -229,125 +221,6 @@ ax1.tick_params(direction = 'in', length = 20, width = 3)
 leg1 = ax1.legend() #Legende anzeigen
 leg1.get_frame().set_edgecolor('k') #schwarzer Kasten um Legende 
 leg1.get_frame().set_linewidth(3) #Linienstärke Kasten um Legende
-
-
-#x_NH3 über T; Vergleich Shomate-Daten mit Larson
-fig2,ax2 = plt.subplots()
-ax2.plot(T_plot2_sh,x_NH3_plot2_sh, '-', color ='rebeccapurple', label = 'Shomate', linewidth = 5)
-ax2.plot(T_plot2_vgl,x_NH3_plot2_vgl, 'o', color ='orange', label = 'Larson', markersize = 15)
-ax2.set(xlabel = '$T$ / K', ylabel = '$x\mathregular{_{NH_3}}$ / 1') #Beschriftung Achsen; Kursiv durch $$; Index durch _{}
-ax2.set(xlim=(T_plot2_sh[0],T_plot2_sh[-1]), ylim=(0, 0.6))
-ax2.tick_params(direction = 'in', length = 20, width = 3)
-
-leg2 = ax2.legend() #Legende anzeigen
-leg2.get_frame().set_edgecolor('k') #schwarzer Kasten um Legende 
-leg2.get_frame().set_linewidth(3) #Linienstärke Kasten um Legende
-
-plt.tight_layout()
-#Anzeigen der Diagramme
-plt.show()
-
-# #Standardreaktionsentropie delta_R_S_0
-# delta_R_S_0 = np.zeros(len(T_array))
-# for i in range (0, len(T_array)):
-#     T = T_array[i]
-#     delta_R_S_0[i] = v_H2 * shomate_S(T, H2) + v_N2 * shomate_S(T, N2) + v_NH3 * shomate_S(T, NH3) # J mol^-1 K^-1
-
-# #freie Standard Reaktionsenthalpie delta_R_G_0
-# delta_R_G_0 = delta_R_H_0 - T_array * delta_R_S_0 # J mol^-1
-
-# #allgemeine GGW-Konstante K_0
-# K_0 = np.exp((-delta_R_G_0) / (T_array * R)) # 1
-
-# #spezifische GGW-Konstante K_x
-# # K_x = np.zeros((len(K_0), len(p_array)))
-# # for i in range(0,len(K_0)):
-# #     K_x[i] = K_0[i]* (p_0 / p_array)**(sum(v)) # 1 (Summe der stoechiometrischen Koeffizienten im Exponenten)
-
-# K_x = K_0 * (p_0 / p)**(sum(v)) # 1 (Summe der stoechiometrischen Koeffizienten im Exponenten)
-
-
-# #Numerische Loesung
-# #Definition der Funktion
-# n_ges_0 = n_H2_0 + n_N2_0 + n_NH3_0 # mol Gesamtstoffmenge
-# def fun(xi):
-#     return (n_NH3_0 + 2 * xi)**2 * (n_ges_0 - 2 * xi)**2 - K_x * (n_H2_0 - 3 * xi)**3 * (n_N2_0 - xi)
-
-# #Bestimmung Startwert
-# xi_0 = (-0.5 * n_NH3_0 + min(n_N2_0, 1/3 * n_H2_0)) / 2
-# xi_0 = np.full_like(K_x, xi_0)
-# #Lösung Polynom
-# sol = root(fun, xi_0)
-# xi = sol.x #mol Reaktionslaufzahl
-
-# #Kontrolle: pyhiskalisch moegliche Loesung?
-# for i in range(0, len(xi)):
-#     j = 0 # Zähler while-Schleife resetten
-#     while xi[i] < (-0.5 * n_NH3_0) or xi[i] > min(n_N2_0, 1/3 * n_H2_0):
-#         #Berechnung xi mit anderem Startwert
-#         xi_0[i] = (-0.5 * n_NH3_0 + min(n_N2_0, 1/3 * n_H2_0)) / (4 * (j+1))
-#         sol = root(fun, xi_0)
-#         xi = sol.x #mol Reaktionslaufzahl
-
-# #Berechnung der Stoffmengen im Gleichgewicht
-# n_H2 = xi * v_H2 + n_H2_0 # mol Stoffmenge H2 Gleichgewicht
-# n_N2 = xi * v_N2 + n_N2_0 # mol Stoffmenge N2 Gleichgewicht
-# n_NH3 = xi * v_NH3 + n_NH3_0 # mol Stoffmenge NH3 Gleichgewicht
-
-
-    
-
-# #Lösung durch Wurzelausdrücke
-# # =============================================================================
-# #Analytische Loesung (Gleichung 4. Grades)
-# #Koeffizienten
-# a = K_x * v_N2 * v_H2**3 - (v_NH3**2 * sum(v)**2)
-# b = K_x * (n_N2_0 * v_H2**3 + 3 * v_N2 * n_H2_0 * v_H2**2) - (2 * n_NH3_0 * v_NH3 * sum(v)**2 + 2 * n_ges_0 * v_NH3**2 * sum(v))
-# c = K_x * (3 * n_N2_0 * n_H2_0 * v_H2**2 + 3 * n_H2_0**2 * v_H2**2) - (n_NH3_0**2 * sum(v)**2 + 4 * n_NH3_0 * v_NH3 * n_ges_0 * sum(v) + v_NH3**2 * n_ges_0**2)
-# d = K_x * (3 * n_N2_0 * n_H2_0**2 * v_H2 + v_N2 * n_H2_0**3) - (2 * n_NH3_0**2 * n_ges_0 * sum(v) + 2 * n_NH3_0 * v_NH3 * n_ges_0**2)
-# e = K_x * (n_N2_0 * n_H2_0**3) - (n_NH3_0**2 * n_ges_0**2)
-
-
-# # =============================================================================
-# # a = 1
-# # b = B / A
-# # c = C / A
-# # d = D / A
-# # e = E / A
-# # =============================================================================
-# p = (8 * a * c - 3 * b**2) / (8 * a**3)
-# q = (b**3 - 4 * a * b * c + 8 * a**2 * d) / (8 * a**3)
-
-# delta_0 = c**2 - 3 * b * d + 12 * a * e
-# delta_1 = 2 * c**3 - 9 * b * c * d + 27 * b**2 * e + 27 * a * d**2 - 72 * a * c * e
-
-
-# Q = ((delta_1 + (delta_1**2 - 4 * delta_0**3)**0.5) / 2)**(1/3) # Achtung negative Wurzel
-# S = 0.5 * (-2 / 3 * p + 1 / (3 * a) * (Q + (delta_0 / Q)))**0.5
-
-# #moegliche Loesungen für Stoffmenge von Ammoniak
-# xi = np.zeros((4,len(T_array)))
-# xi[0] = -b / (4 * a) - S + 0.5 *(-4 * S**2 - 2 * p + q / S)**0.5
-# xi[1] = -b / (4 * a) - S - 0.5 *(-4 * S**2 - 2 * p + q / S)**0.5
-# xi[2] = -b / (4 * a) + S + 0.5 *(-4 * S**2 - 2 * p + q / S)**0.5
-# xi[3] = -b / (4 * a) + S - 0.5 *(-4 * S**2 - 2 * p + q / S)**0.5
-# print(xi)
-# # =============================================================================
- 
-# #Loeschen der physikalisch nicht moeglichen Loesungen
-# k = 3
-# for j in range (0, len(T_array)):
-#     for i in range(k,0-1,-1):
-#         if n_NH3[i,j] < 0:
-#             n_NH3 = np.delete(n_NH3,[i,j])
-#         elif n_NH3[i,j] > (-v_NH3 / v_H2 * n_H2):
-#             n_NH3 = np.delete(n_NH3,[i,j])
-#         elif n_NH3[i,j] > (-v_NH3 / v_N2 * n_N2):
-#             n_NH3 = np.delete(n_NH3,[i,j])
-#     print(n_NH3)
-# =============================================================================
-
-        
         
 
 

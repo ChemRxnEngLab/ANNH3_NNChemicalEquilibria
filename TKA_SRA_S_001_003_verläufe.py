@@ -182,7 +182,7 @@ for i in range(0, len(p_plot1)):
         xi_plot1[j,i] = GGW(T_plot1[j],p_plot1[i], n_H2_0_plot, n_N2_0_plot, n_NH3_0_plot)
 
 #Diagramm2: x_NH3 über T; Vergleich Shomate-Daten mit Daten nach Larson
-T_plot2_sh = np.linspace(520, 800, num = num_plot) #K Temperatur für Shomate
+T_plot2_sh = np.linspace(650, 850, num = num_plot) #K Temperatur für Shomate
 T_plot2_vgl = np.array([300, 350, 400, 450, 500]) + 273.15 #K Temperatur für Vergleichsdaten; umrechnung von °C
 p_plot2 = 100 * 1.01325 #bar Druck; umgerechnet von atm
 
@@ -200,7 +200,7 @@ n_ges_plot2_sh = n_H2_plot2_sh + n_N2_plot2_sh + n_NH3_plot2_sh #mol Gesamtstoff
 x_NH3_plot2_sh = n_NH3_plot2_sh / n_ges_plot2_sh #Stoffmengenanteil NH3 im GG mit Shomate
 x_NH3_plot2_vgl = np.array([52.04, 37.35, 25.12, 16.43, 10.61]) / 100 # 1 Stoffmengenanteil NH3 im GG; umgerechnet von %
 
-#np.savez("data/eq_dataset_T_var.npz", T = T_plot2_sh, p = np.full_like(T_plot2_sh, p_plot2), x_0 = [x_H2_0_plot, x_N2_0_plot, x_NH3_0_plot], x = x_NH3_plot2_sh)
+np.savez("data/eq_dataset_T_var.npz", T = T_plot2_sh, p = np.full_like(T_plot2_sh, p_plot2), x_0 = [x_H2_0_plot, x_N2_0_plot, x_NH3_0_plot], x = x_NH3_plot2_sh)
 
 #Diagramme zeichnen
 #Allgemeine Formatierung
