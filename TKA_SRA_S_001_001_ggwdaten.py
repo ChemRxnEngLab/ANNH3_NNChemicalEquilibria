@@ -3,7 +3,10 @@
 #Importe / Bibliotheken
 import numpy as np
 from scipy.optimize import root
+import matplotlib as mpl
 import matplotlib.pyplot as plt
+from pathlib import Path
+
 
 
 #Stoechiometrische Koeffizienten Ammoniaksynthese
@@ -153,7 +156,7 @@ n_ges = n_H2 + n_N2 + n_NH3 # mol Gesamtstoffmenge Gleichgewicht
 x = (np.array([n_H2, n_N2, n_NH3]) / n_ges).T # 1 Stoffmengenanteile im Gleichgewicht
 
 #Speichern der GGW Daten
-#np.savez("data/eq_dataset.npz", T = T, p = p, x_H2_0 = x_0[:,0], x_N2_0 = x_0[:,1], x_NH3_0 = x_0[:,2], xi = xi)
+#np.savez("data/eq_dataset_x.npz", T = T, p = p, x_H2_0 = x_0[:,0], x_N2_0 = x_0[:,1], x_NH3_0 = x_0[:,2], xi = xi)
 #np.savez("data/eq_dataset.npz", T = T, p = p, x_0 = x_0, xi = xi)
 #np.savez("data/eq_dataset_x_10000.npz", T = T, p = p, x_0 = x_0, x = x)
 #np.savez("data/eq_dataset_x_20000.npz", T = T, p = p, x_0 = x_0, x = x)
@@ -204,42 +207,52 @@ x_NH3_plot2_vgl = np.array([52.04, 37.35, 25.12, 16.43, 10.61]) / 100 # 1 Stoffm
 
 #Diagramme zeichnen
 #Allgemeine Formatierung
-plt.rc('font', size = 40) # Schriftgroesse
-plt.rc('lines', linewidth = 7) # Linienstaerke
-plt.rcParams['axes.linewidth'] = 3 # Dicke Rahmenlinie
-
+plt.style.use(['seaborn-v0_8-paper', Path.cwd() / 'plotstyle' / 'paper.mplstyle'])
+#mpl.rcParams.update(mpl.rcParamsDefault)
+cm = 1/2.54
 
 #xi über T bei unterschiedlichen p
 fig1,ax1 = plt.subplots()
-ax1.plot(T_plot1,xi_plot1[:,0],'-', color ='rebeccapurple', label = '$p$ = 50 bar') #Achsen definieren
-ax1.plot(T_plot1, xi_plot1[:,1], '--', color ='teal', label = '$p$ = 200 bar')
-ax1.plot(T_plot1,xi_plot1[:,2], ':', color ='orange', label = '$p$ = 500 bar')
+ax1.plot(T_plot1,xi_plot1[:,0],'-', label = '$p$ = 50 bar') #Achsen definieren
+ax1.plot(T_plot1, xi_plot1[:,1], '--', label = '$p$ = 200 bar')
+ax1.plot(T_plot1,xi_plot1[:,2], ':', label = '$p$ = 500 bar')
 #'o': Punkte;'-': Verbindung mit Linien; '--':gestrichelte Linie...
 #Farbe ändern: b blau; r rot; g grün; y yellow; m magenta; c cyan; schwarz k; w weiß
 ax1.set(xlabel = '$T$ / K', ylabel = '$\\xi$ / mol') #Beschriftung Achsen; Kursiv durch $$; Index durch _{}
 ax1.set(xlim=(T_plot1[0],T_plot1[-1]), ylim=(0, 0.25))
-ax1.tick_params(direction = 'in', length = 20, width = 3)
-
+ax1.tick_params(direction = 'in')
+ax1.grid()
 leg1 = ax1.legend() #Legende anzeigen
-leg1.get_frame().set_edgecolor('k') #schwarzer Kasten um Legende 
-leg1.get_frame().set_linewidth(3) #Linienstärke Kasten um Legende
+# =============================================================================
+# leg1.get_frame().set_edgecolor('k') #schwarzer Kasten um Legende 
+# leg1.get_frame().set_linewidth(3) #Linienstärke Kasten um Legende
+# =============================================================================
 
 
 #x_NH3 über T; Vergleich Shomate-Daten mit Larson
-fig2,ax2 = plt.subplots()
-ax2.plot(T_plot2_sh,x_NH3_plot2_sh, '-', color ='rebeccapurple', label = 'Shomate', linewidth = 5)
-ax2.plot(T_plot2_vgl,x_NH3_plot2_vgl, 'o', color ='orange', label = 'Larson', markersize = 15)
+fig2,ax2 = plt.subplots(figsize=(9.75*cm,6.5*cm))
+ax2.plot(T_plot2_sh,x_NH3_plot2_sh, '-', label = 'Shomate')
+ax2.plot(T_plot2_vgl,x_NH3_plot2_vgl, 'x', label = 'Larson')
 ax2.set(xlabel = '$T$ / K', ylabel = '$x\mathregular{_{NH_3}}$ / 1') #Beschriftung Achsen; Kursiv durch $$; Index durch _{}
 ax2.set(xlim=(T_plot2_sh[0],T_plot2_sh[-1]), ylim=(0, 0.6))
-ax2.tick_params(direction = 'in', length = 20, width = 3)
+ax2.tick_params(direction = 'in')
+ax2.grid()
 
 leg2 = ax2.legend() #Legende anzeigen
-leg2.get_frame().set_edgecolor('k') #schwarzer Kasten um Legende 
-leg2.get_frame().set_linewidth(3) #Linienstärke Kasten um Legende
+# =============================================================================
+# leg2.get_frame().set_edgecolor('k') #schwarzer Kasten um Legende 
+# leg2.get_frame().set_linewidth(3) #Linienstärke Kasten um Legende
+# =============================================================================
 
 plt.tight_layout()
+#Speichern der Plots
+fig1.savefig(Path.cwd() / 'plots/ggw/TKA_SRA_PGGW_001.png', bbox_inches = 'tight')
+fig2.savefig(Path.cwd() / 'plots/ggw/TKA_SRA_PGGW_002.png', bbox_inches = 'tight')
+
 #Anzeigen der Diagramme
 plt.show()
+
+
 
 # #Standardreaktionsentropie delta_R_S_0
 # delta_R_S_0 = np.zeros(len(T_array))
