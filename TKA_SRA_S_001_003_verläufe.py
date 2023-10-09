@@ -200,7 +200,7 @@ n_ges_plot2_sh = n_H2_plot2_sh + n_N2_plot2_sh + n_NH3_plot2_sh #mol Gesamtstoff
 x_NH3_plot2_sh = n_NH3_plot2_sh / n_ges_plot2_sh #Stoffmengenanteil NH3 im GG mit Shomate
 x_NH3_plot2_vgl = np.array([52.04, 37.35, 25.12, 16.43, 10.61]) / 100 # 1 Stoffmengenanteil NH3 im GG; umgerechnet von %
 
-np.savez("data/eq_dataset_T_var.npz", T = T_plot2_sh, p = np.full_like(T_plot2_sh, p_plot2), x_0 = [x_H2_0_plot, x_N2_0_plot, x_NH3_0_plot], x = x_NH3_plot2_sh)
+#np.savez("data/eq_dataset_T_var.npz", T = T_plot2_sh, p = np.full_like(T_plot2_sh, p_plot2), x_0 = [x_H2_0_plot, x_N2_0_plot, x_NH3_0_plot], x = x_NH3_plot2_sh)
 
 #Diagramme zeichnen
 #Allgemeine Formatierung

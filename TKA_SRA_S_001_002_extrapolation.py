@@ -24,10 +24,10 @@ R = 8.31448 # J mol^-1 K^-1 Ideale Gaskonstane
 p_0 = 1 # bar Standarddruck
 
 #Parameter
-num = 100 # Anzahl der Werte im Vektor
+num = 10000 # Anzahl der Werte im Vektor
 
-T = np.random.uniform(500,850 + 1,num) # K Temperatur
-p = np.random.uniform(80,100 + 1,num) # bar Druck
+T = np.random.uniform(500,650 + 1,num) # K Temperatur
+p = np.random.uniform(10,80 + 1,num) # bar Druck
 
 #Stofffmengen zu Reaktionsbeginn
 n_ges_0 = 1 # mol Gesamtstoffmenge zum Reaktionsbeginn
@@ -158,6 +158,7 @@ x = (np.array([n_H2, n_N2, n_NH3]) / n_ges).T # 1 Stoffmengenanteile im Gleichge
 #np.savez("data/eq_dataset_x_10000.npz", T = T, p = p, x_0 = x_0, x = x)
 #np.savez("data/eq_dataset_x_20000.npz", T = T, p = p, x_0 = x_0, x = x)
 #np.savez("data/eq_dataset_x_extra.npz", T = T, p = p, x_0 = x_0, x = x)
+#np.savez("data/eq_dataset_x_extra_10000.npz", T = T, p = p, x_0 = x_0, x = x)
 #np.savez("data/eq_dataset_x_extra_haber.npz", T = T, p = p, x_0 = x_0, x = x)
 #np.savez("data/eq_dataset_x_extra_haber_picaso.npz", T = T, p = p, x_0 = x_0, x = x)
 
@@ -223,7 +224,7 @@ T_plot = np.array([600, 650, 800, 850]) #K Temperatur
 p_plot = np.linspace(1,450, num = num_plot) #bar Druck;
 
 #Aufrufen der Funktion zur Berechnung von xi mit Shomate
-xi_plot = np.zeros((num_plot,len(p_plot)))
+xi_plot = np.zeros((num_plot,len(T_plot)))
 for i in range(0, len(T_plot)):
     for j in range(0, len(p_plot)):
         xi_plot[j,i] = GGW(T_plot[i],p_plot[j], n_H2_0_plot, n_N2_0_plot, n_NH3_0_plot)
@@ -237,14 +238,14 @@ n_ges_plot = n_H2_plot + n_N2_plot + n_NH3_plot #mol Gesamtstoffmenge Gleichgewi
 #Stofmengenanteile NH3 im GG
 x_NH3_plot = n_NH3_plot / n_ges_plot #Stoffmengenanteil NH3 im GG mit Shomate
 
-np.savez("data/eq_dataset_p_var_extra_haber.npz", T = T_plot, p = p_plot, x_0 = [x_H2_0_plot, x_N2_0_plot, x_NH3_0_plot], x = x_NH3_plot)
+#np.savez("data/eq_dataset_p_var_extra_haber.npz", T = T_plot, p = p_plot, x_0 = [x_H2_0_plot, x_N2_0_plot, x_NH3_0_plot], x = x_NH3_plot)
 
 # Datensets für das trainierte Netz im Haber-Bosch und PICASO Bereich
 T_plot = np.array([450, 500, 600, 650, 750, 850, 900]) #K Temperatur
 p_plot = np.linspace(1,450, num = num_plot) #bar Druck;
 
 #Aufrufen der Funktion zur Berechnung von xi mit Shomate
-xi_plot = np.zeros((num_plot,len(p_plot)))
+xi_plot = np.zeros((num_plot,len(T_plot)))
 for i in range(0, len(T_plot)):
     for j in range(0, len(p_plot)):
         xi_plot[j,i] = GGW(T_plot[i],p_plot[j], n_H2_0_plot, n_N2_0_plot, n_NH3_0_plot)
@@ -260,23 +261,25 @@ x_NH3_plot = n_NH3_plot / n_ges_plot #Stoffmengenanteil NH3 im GG mit Shomate
 
 #np.savez("data/eq_dataset_p_var_extra_haber_picaso.npz", T = T_plot, p = p_plot, x_0 = [x_H2_0_plot, x_N2_0_plot, x_NH3_0_plot], x = x_NH3_plot)
 
-
-T_plot = np.linspace(300,1300, num = num_plot) #K Temperatur
-p_plot = np.array([5, 10, 30, 80, 90, 100, 150, 250, 300]) #bar Druck;
-
-#Aufrufen der Funktion zur Berechnung von xi mit Shomate
-xi_plot = np.zeros((num_plot,len(p_plot)))
-for i in range(0, len(p_plot)):
-    for j in range(0, len(T_plot)):
-        xi_plot[j,i] = GGW(T_plot[j],p_plot[i], n_H2_0_plot, n_N2_0_plot, n_NH3_0_plot)
-
-#Berechnung der Gesamt(stoffmengen) im Gleichgewicht im Shomate    
-n_H2_plot = xi_plot * v_H2 + n_H2_0_plot # mol Stoffmenge H2 Gleichgewicht
-n_N2_plot = xi_plot * v_N2 + n_N2_0_plot # mol Stoffmenge N2 Gleichgewicht
-n_NH3_plot = xi_plot * v_NH3 + n_NH3_0_plot # mol Stoffmenge NH3 Gleichgewicht
-n_ges_plot = n_H2_plot + n_N2_plot + n_NH3_plot #mol Gesamtstoffmenge Gleichgewicht
-
-#Stofmengenanteile NH3 im GG
-x_NH3_plot = n_NH3_plot / n_ges_plot #Stoffmengenanteil NH3 im GG mit Shomate
+# =============================================================================
+# 
+# T_plot = np.linspace(300,1300, num = num_plot) #K Temperatur
+# p_plot = np.array([5, 10, 30, 80, 90, 100, 150, 250, 300]) #bar Druck;
+# 
+# #Aufrufen der Funktion zur Berechnung von xi mit Shomate
+# xi_plot = np.zeros((num_plot,len(p_plot)))
+# for i in range(0, len(p_plot)):
+#     for j in range(0, len(T_plot)):
+#         xi_plot[j,i] = GGW(T_plot[j],p_plot[i], n_H2_0_plot, n_N2_0_plot, n_NH3_0_plot)
+# 
+# #Berechnung der Gesamt(stoffmengen) im Gleichgewicht im Shomate    
+# n_H2_plot = xi_plot * v_H2 + n_H2_0_plot # mol Stoffmenge H2 Gleichgewicht
+# n_N2_plot = xi_plot * v_N2 + n_N2_0_plot # mol Stoffmenge N2 Gleichgewicht
+# n_NH3_plot = xi_plot * v_NH3 + n_NH3_0_plot # mol Stoffmenge NH3 Gleichgewicht
+# n_ges_plot = n_H2_plot + n_N2_plot + n_NH3_plot #mol Gesamtstoffmenge Gleichgewicht
+# 
+# #Stofmengenanteile NH3 im GG
+# x_NH3_plot = n_NH3_plot / n_ges_plot #Stoffmengenanteil NH3 im GG mit Shomate
+# =============================================================================
 
 #np.savez("data/eq_dataset_T_var_extra_haber_picaso.npz", T = T_plot, p = p_plot, x_0 = [x_H2_0_plot, x_N2_0_plot, x_NH3_0_plot], x = x_NH3_plot)

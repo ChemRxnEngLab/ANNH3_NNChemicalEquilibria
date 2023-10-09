@@ -161,7 +161,7 @@ n_ges = n_H2 + n_N2 + n_NH3 # mol Gesamtstoffmenge Gleichgewicht
 x = (np.array([n_H2, n_N2, n_NH3]) / n_ges).T # 1 Stoffmengenanteile im Gleichgewicht
 
 pred_time_100 = (timeit.timeit('calc(T, p, n_H2_0, n_N2_0, n_NH3_0)', number = 100, globals=globals())) /  100
-pred_time_1 = (timeit.timeit('GGW(800, 200, 0.5, 0.3, 0.2)', number = 1000, globals=globals())) /  1000
+pred_time_1 = (timeit.timeit('GGW(800, 200, 0.5, 0.3, 0.2)', number = 10000, globals=globals())) /  1000
 
 #Parameter
 num = 500 # Anzahl der Werte im Vektor
