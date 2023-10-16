@@ -7,7 +7,7 @@ In diesem Projekt werden Ersatzmodelle für die physikalische Berechnung des Rea
 Alle Simulationen und Plots dieser Arbeit werden mit Python 3.10.9 umgesetzt und erstellt. In der Datei [bio-SR_03_23.txt](./bio-SR_03_23.txt) sind alle verwendeten Packages und ihre Versionen gelistet, sie kann zur Erstellung einer identischen Programmierumgebung genutzt werden.
 
 ## Benennug der Dateien
-Die folgende Tabelle gibt einen Überblick über die Nummerierung und Benennung der Dateien in diesem Projekt. X dient als Platzhalter für eine Ziffer. Genauere Informationen zu dem durchgeführten Experimente der jeweiligen Datei sind in den Excel-Datein im Ordner [Experimente](./Experimente) festgehalten.
+Die folgende Tabelle gibt einen Überblick über die Nummerierung und Benennung der Dateien in diesem Projekt. X dient als Platzhalter für eine Ziffer. Genauere Informationen zu dem durchgeführten Experiment in der jeweiligen Datei sind den Excel-Datein im Ordner [Experimente](./Experimente) zu entnehmen.
 |Dateiname|Inhalt|
 |:----------|:----------|
 |001_XXX|Erzeugung der Gleichgewichtsdaten durch thermodynamische Berechnung mittels Shomate-Gleichungen|
@@ -29,6 +29,7 @@ Die folgende Tabelle gibt einen Überblick über die Nummerierung und Benennung 
 |AV_XXX|Vergleichende Auswertung der verschiedenen Modelle|
 
 ## Beste Ersatzmodelle
+Nach der Optimierung wurde für jede getestete ML-Methode das jeweils leistungstärkste Modell bestimmt. Die besten Modelle für jede Methode sind in der folgengen Tabelle gelistet.
 |ML-Modell|Dateiname|
 |:----------|:----------|
 |aNN|005_020|
@@ -36,7 +37,8 @@ Die folgende Tabelle gibt einen Überblick über die Nummerierung und Benennung 
 |xgb|011_027|
 
 ## Kontakt
-Sina Ramsayer, Mat-Nr.: 1063115  
+Sina Ramsayer, Mat-Nr.: 1063115
+
 Betreuer: Theresa Kunz, Hannes Stagge  
 Angefertigt am: Institut für Chemieingenieurwesen  
 Abgabe Abschlussarbeit: 09.10.23
