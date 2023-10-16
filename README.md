@@ -15,7 +15,7 @@ Die folgende Tabelle gibt einen Überblick über die Nummerierung und Benennung 
 |:----------|:----------|
 |001_XXX|Erzeugung der Gleichgewichtsdaten durch thermodynamische Berechnung mittels Shomate-Gleichungen|
 |002_XXX|Experimente aNN; Output-Variable xi; Normalisierung mittels BatchNorm|
-|003_XXX|Experimente aNN; Output-Variablen x_H2 und x_NH3; Normalisierung mittels BatchNorm|
+|003_XXX|Experimente aNN; Output-Variablen $$x_H2$$ und x_NH3; Normalisierung mittels BatchNorm|
 |004_XXX|Experimente aNN; Output-Variablen xi; Prestandardization|
 |005_XXX|Experimente aNN; Output-Variablen x_H2 und x_NH3; Prestandardization|
 |006_XXX|Nachbau von aNN-Architekturen aus der Fachliteratur|
@@ -39,8 +39,8 @@ Die folgende Tabelle gibt einen Überblick über die Nummerierung und Benennung 
 |xgb|011_027|
 
 ## Kontakt
-Sina Ramsayer, Mat-Nr.: 1063115
-Betreuer: Theresa Kunz, Hannes Stagge
+Sina Ramsayer, Mat-Nr.: 1063115  
+Betreuer: Theresa Kunz, Hannes Stagge  
 Angefertigt am: Institut für Chemieingenieurwesen
 
 Bei Fragen zum Projekt bin ich per Mail (sinaramsayer@uni-ulm.de) erreichbar.
