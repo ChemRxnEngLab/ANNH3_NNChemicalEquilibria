@@ -20,8 +20,8 @@ Die folgende Tabelle gibt einen Überblick über die Nummerierung und Benennung 
 |008_XXX|Experimente kNN; Output-Variablen x_H2 und x_NH3|
 |009_XXX|Nachbau von kNN-Modellen aus der Fachliteratur|
 |010_XXX|xgb-Modelle; umgesetzt mit scikit-learn|
-|011_XXX|Experimente xgb; umgesetzt mit XGBoost-Learining API|
-|012_XXX|Experimente xgb; umgesetzt mit XGBoost-Learining API; größerer Datensatz|
+|011_XXX|Experimente xgb; umgesetzt mit XGBoost-Learning API|
+|012_XXX|Experimente xgb; umgesetzt mit XGBoost-Learning API; größerer Datensatz|
 |XXX_XXX_001|Erweiterte Auswertung des Modells XXX_XXX|
 |AA_XXX|Vergleichende Auswertung aNN|
 |AK_XXX|Vergleichende Auswertung kNN|
