@@ -15,7 +15,7 @@ Die folgende Tabelle gibt einen Überblick über die Nummerierung und Benennung 
 |:----------|:----------|
 |001_XXX|Erzeugung der Gleichgewichtsdaten durch thermodynamische Berechnung mittels Shomate-Gleichungen|
 |002_XXX|Experimente aNN; Output-Variable xi; Normalisierung mittels BatchNorm|
-|003_XXX|Experimente aNN; Output-Variablen $$x_H2$$ und x_NH3; Normalisierung mittels BatchNorm|
+|003_XXX|Experimente aNN; Output-Variablen *x*~(H~2~)~ und x_NH3; Normalisierung mittels BatchNorm|
 |004_XXX|Experimente aNN; Output-Variablen xi; Prestandardization|
 |005_XXX|Experimente aNN; Output-Variablen x_H2 und x_NH3; Prestandardization|
 |006_XXX|Nachbau von aNN-Architekturen aus der Fachliteratur|
