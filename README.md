@@ -4,6 +4,8 @@
 ## Beschreibung
 In diesem Projekt werden Ersatzmodelle für die physikalische Berechnung des Reaktionsgleichgewichts getestet und optimiert. Als Beispielreaktion dient die Ammoniaksynthese. Es werden ein **neuronales Netz** (aNN), ein **K-Nearest-Neighbor Algorithmus** (kNN) und ein **XGBoost-Modell** (xgb) untersucht.
 
+![](./figures/TKA_SRA_GA_2.png)
+
 Alle Simulationen und Plots dieser Arbeit werden mit Python 3.10.9 umgesetzt und erstellt. In der Datei [bio-SR_03_23.txt](./bio-SR_03_23.txt) sind alle verwendeten Packages und ihre Versionen gelistet, sie kann zur Erstellung einer identischen Programmierumgebung genutzt werden.
 
 ## Benennug der Dateien
