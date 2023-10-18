@@ -45,5 +45,5 @@ Betreuer: Theresa Kunz, Hannes Stagge
 Angefertigt am: Institut für Chemieingenieurwesen  
 Abgabe Abschlussarbeit: 09.10.23
 
-Bei Fragen zum Projekt bin ich per Mail (sinaramsayer@uni-ulm.de) erreichbar.
+Bei Fragen zum Projekt bin ich per Mail (sina.ramsayer@uni-ulm.de) erreichbar.
 
