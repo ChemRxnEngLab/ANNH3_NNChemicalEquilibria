@@ -1,20 +1,11 @@
 from typing import Any
-from lightning.pytorch.utilities.types import STEP_OUTPUT
 import torch
 from torch import nn
-from torch.nn.functional import normalize as norm
-from torch import log10
 from torch.utils.data import TensorDataset, DataLoader, random_split
-from torch.optim.lr_scheduler import StepLR, MultiStepLR, ReduceLROnPlateau
-from sklearn.metrics import r2_score as r2
-from sklearn.metrics import max_error
-
-# from sklearn.metrics import mean_squared_error as MSE
-# from sklearn.metrics import mean_absolute_error as MAE
+from torch.optim.lr_scheduler import ReduceLROnPlateau
+import torchmetrics as tm
 import numpy as np
-import matplotlib.pyplot as plt
 from pathlib import Path
-import time
 import wandb
 
 import lightning.pytorch as pl
@@ -93,7 +84,9 @@ class DataModule(pl.LightningDataModule):
         # print(X_norm)
 
         self.data = TensorDataset(X_norm, y_norm)
-        self.train_dataset, self.test_dataset = random_split(self.data, [0.8, 0.2])
+        self.train_dataset, self.val_dataset, self.test_dataset = random_split(
+            self.data, [0.7, 0.1, 0.2]
+        )
 
     def train_dataloader(self):
         return DataLoader(
@@ -105,6 +98,13 @@ class DataModule(pl.LightningDataModule):
     def test_dataloader(self):
         return DataLoader(
             self.test_dataset,
+            batch_size=self.batch_size,
+            shuffle=False,
+        )
+
+    def val_dataloader(self):
+        return DataLoader(
+            self.val_dataset,
             batch_size=self.batch_size,
             shuffle=False,
         )
@@ -128,6 +128,9 @@ class EqNet(pl.LightningModule):
             output_size,
         )
 
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return self.net(x)
+
     def training_step(self, batch: torch.Tensor, batch_idx: int) -> torch.Tensor:
         X, y = batch
         pred = self.net(X)
@@ -136,7 +139,7 @@ class EqNet(pl.LightningModule):
         self.log(
             "train/loss",
             mse_loss,
-            on_step=True,
+            on_step=False,
             on_epoch=True,
             prog_bar=True,
             logger=True,
@@ -150,9 +153,9 @@ class EqNet(pl.LightningModule):
         self.log(
             "val/loss",
             mse_loss,
-            on_step=True,
+            on_step=False,
             on_epoch=True,
-            prog_bar=True,
+            prog_bar=False,
             logger=True,
         )
         return mse_loss
@@ -164,13 +167,46 @@ class EqNet(pl.LightningModule):
         self.log(
             "test/loss",
             mse_loss,
-            on_step=True,
+            on_step=False,
             on_epoch=True,
             prog_bar=True,
             logger=True,
         )
 
+        y_true = y * self.trainer.datamodule.y_std.to(
+            self.device
+        ) + self.trainer.datamodule.y_mean.to(self.device)
+        y_pred = pred * self.trainer.datamodule.y_std.to(
+            self.device
+        ) + self.trainer.datamodule.y_mean.to(self.device)
+
+        MAE = torch.nn.functional.l1_loss(y_true, y_pred)
+        self.log(
+            "test/MAE",
+            MAE,
+            on_step=False,
+            on_epoch=True,
+            prog_bar=False,
+            logger=True,
+        )
+
+        MAPE = tm.MeanAbsolutePercentageError().to(self.device)(y_true, y_pred)
+        self.log(
+            "test/MAPE",
+            MAPE,
+            on_step=False,
+            on_epoch=True,
+            prog_bar=False,
+            logger=True,
+        )
         return mse_loss
+
+    def predict_step(self, batch: Any, batch_idx: int, dataloader_idx: int = 0) -> Any:
+        y = (
+            self.net(batch) * self.trainer.datamodule.y_std
+            + self.trainer.datamodule.y_mean
+        )
+        return y
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=0.01)
@@ -190,7 +226,7 @@ class EqNet(pl.LightningModule):
 model = EqNet(5, 200, 200, 200, 2)
 dm = DataModule(
     path_1=Path.cwd() / "data" / "eq_dataset_x.npz",
-    path_2=Path.cwd() / "data" / "eq_dataset_x.npz",
+    path_2=Path.cwd() / "data" / "eq_dataset_x_extra.npz",
     batch_size=32,
 )
 
@@ -206,7 +242,7 @@ my_logger = pl.loggers.WandbLogger(
 Trainer = pl.Trainer(
     accelerator="cuda",
     devices=1,
-    max_epochs=2000,
+    max_epochs=1000,
     # callbacks=[
     #     lr_callback,
     #     test_logging_callback,
@@ -218,3 +254,15 @@ Trainer = pl.Trainer(
 
 Trainer.fit(model, dm)
 Trainer.test(model, dm)
+
+torch.save(
+    model.net.state_dict,
+    Path.cwd() / "models" / "torch" / "NH3_net.pt",
+)
+model.to_onnx(
+    Path.cwd() / "models" / "onnx" / "NH3_net.onnx",
+    input_sample=torch.rand((5,)),
+    export_params=True,
+)
+
+wandb.finish()
