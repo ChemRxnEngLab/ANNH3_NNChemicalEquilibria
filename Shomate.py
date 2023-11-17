@@ -188,7 +188,7 @@ def Delta_R_H_0(
     float
         reaction enthalphy in J/mol
     """
-    return sum([nu * component.Delta_H_0(T) for nu, component in zip(nus, components)])
+    return sum([nu * component.H_0(T) for nu, component in zip(nus, components)])
 
 
 def Delta_R_S_0(
@@ -349,3 +349,5 @@ if __name__ == "__main__":
     print(H2.c_P(300))
     print(H2.S_0(300))
     print(H2.Delta_H_0(600))
+    print(Delta_R_H_0(298.15, [-1, -3, 2], [N2, H2, NH3]))
+    print(Delta_R_H_0(600, [-1, -3, 2], [N2, H2, NH3]))
