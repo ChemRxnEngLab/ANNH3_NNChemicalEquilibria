@@ -29,7 +29,9 @@ p_0 = 1  # bar Standarddruck
 num = 1_000_000  # Anzahl der Werte im Vektor
 
 T = np.random.uniform(408.15, 1273.15, num)  # K Temperatur
-p = loguniform.rvs(1, 500, num)  # bar Druck
+p = loguniform.rvs(1, 500, size=num)  # bar Druck
+print(p)
+print(p.shape)
 
 # Stofffmengen zu Reaktionsbeginn
 n_ges_0 = 1  # mol Gesamtstoffmenge zum Reaktionsbeginn
