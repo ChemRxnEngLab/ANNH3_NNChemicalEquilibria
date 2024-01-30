@@ -27,8 +27,8 @@ p_0 = 1  # bar Standarddruck
 # Parameter
 num = 1_000_000  # Anzahl der Werte im Vektor
 
-T = np.random.uniform(405, 1000, num)  # K Temperatur
-p = np.random.uniform(10, 350, num)  # bar Druck
+T = np.random.uniform(408.15, 1273.15, num)  # K Temperatur
+p = np.random.uniform(1, 500, num)  # bar Druck
 
 # Stofffmengen zu Reaktionsbeginn
 n_ges_0 = 1  # mol Gesamtstoffmenge zum Reaktionsbeginn
