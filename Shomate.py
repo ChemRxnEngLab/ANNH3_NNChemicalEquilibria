@@ -32,7 +32,7 @@ class ShomateCoefficients:
         T_range: tuple[float, ...],
         coeffs: list[CoefficientsDict],
     ):
-        if len(T_range) + 1 != len(coeffs):
+        if len(T_range) != len(coeffs) + 1:
             raise ValueError(
                 "Number of temperature ranges must be one more than the number of coefficients."
             )
@@ -69,7 +69,7 @@ class Shomate:
         self,
         name_str: str,
         Shomate_coeffs: ShomateCoefficients,
-        H_0_ref: float = 0.0,
+        H_0_ref: float,
     ):
         self.name_str = name_str
         self.coeffs = Shomate_coeffs
@@ -148,7 +148,7 @@ class Shomate:
             + coeffs["F"]
             - coeffs["H"]
         )
-        return H * 1000
+        return H * 1000  # kJ/mol -> J/mol
 
     def H_0(self, T: float) -> float:
         """calculates the enthalpy  of the species
@@ -164,6 +164,30 @@ class Shomate:
             enthalpy in J/mol
         """
         return self.Delta_H_0(T) + self.H_0_ref
+
+
+class ElementShomate(Shomate):
+    def __init__(
+        self,
+        name_str: str,
+        Shomate_coeffs: ShomateCoefficients,
+    ):
+        super().__init__(name_str, Shomate_coeffs, 0)
+
+    def Delta_f_H_0(self, T: float) -> float:
+        """calculates the formation enthalpy of the species
+
+        Parameters
+        ----------
+        T : float
+            Temperature in Kelvin
+
+        Returns
+        -------
+        float
+            enthalpydifference to reference state in J/mol
+        """
+        return 0
 
 
 def Delta_R_H_0(
@@ -338,17 +362,31 @@ NH3_c = ShomateCoefficients(
     ],
 )
 
-N2 = Shomate("N2", N2_c)
-H2 = Shomate("H2", H2_c)
+N2 = ElementShomate("N2", N2_c)
+H2 = ElementShomate("H2", H2_c)
 NH3 = Shomate("NH3", NH3_c, H_0_ref=-45.90e3)
 
 
+def main():
+    print("N2")
+    print(f"c_p(600)={NH3.c_P(600)}")
+    print(f"S_0(600)={NH3.S_0(600)}")
+    print(f"DH_0(600)={NH3.Delta_H_0(600)}")
+    print("H2")
+    print(f"c_p(300)={H2.c_P(300)}")
+    print(f"S_0(300)={H2.S_0(300)}")
+    print(f"DH_0(600)={H2.Delta_H_0(600)}")
+    print("All these values match the NIST tables.")
+    print("Test reaction enthalpy")
+    print("N2->N2")
+    print(Delta_f_H_0_N2 := Delta_R_H_0(298.15, [-1, 1], [N2, N2]))
+    print("H2->H2")
+    print(Delta_f_H_0_H2 := Delta_R_H_0(298.15, [-1, 1], [H2, H2]))
+    print("1/2 N2 + 3/2 H2 -> NH3")
+    print(Delta_f_H_0_NH3 := Delta_R_H_0(298.15, [-1 / 2, -3 / 2, 1], [N2, H2, NH3]))
+
+    print(Delta_R_H_0(1000, [-1 / 2, -3 / 2, 1], [N2, H2, NH3]))
+
+
 if __name__ == "__main__":
-    print(NH3.c_P(300))
-    print(NH3.S_0(300))
-    print(NH3.Delta_H_0(600))
-    print(H2.c_P(300))
-    print(H2.S_0(300))
-    print(H2.Delta_H_0(600))
-    print(Delta_R_H_0(298.15, [-1, -3, 2], [N2, H2, NH3]))
-    print(Delta_R_H_0(600, [-1, -3, 2], [N2, H2, NH3]))
+    main()
