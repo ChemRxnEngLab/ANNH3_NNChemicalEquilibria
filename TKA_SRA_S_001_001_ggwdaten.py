@@ -3,7 +3,6 @@
 # Importe / Bibliotheken
 import numpy as np
 from scipy.optimize import root
-import matplotlib as mpl
 import matplotlib.pyplot as plt
 from pathlib import Path
 

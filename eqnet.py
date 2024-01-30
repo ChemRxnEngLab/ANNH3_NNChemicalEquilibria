@@ -42,7 +42,7 @@ class NeuralNetwork(nn.Module):
 
     # Implementierung der Operationen auf Input Daten
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        out = self.linear_afunc_stack(x)
+        out: torch.Tensor = self.linear_afunc_stack(x)
         return out
 
 

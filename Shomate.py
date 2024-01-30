@@ -1,6 +1,6 @@
 import numpy as np
 import numpy.typing as npt
-import scipy.constants
+import scipy.constants  # type: ignore
 import warnings
 from collections import UserDict
 
@@ -9,6 +9,7 @@ from collections import UserDict
 
 class CoefficientsDict(UserDict):
     def __init__(self, values: npt.ArrayLike):
+        values = np.asarray(values)
         if len(values) != 8:
             raise ValueError("Input list must have exactly 8 values.")
         super().__init__()
@@ -28,44 +29,39 @@ class CoefficientsDict(UserDict):
 class ShomateCoefficients:
     def __init__(
         self,
-        lowest_T: float,
-        mid_T: float,
-        highest_T: float,
-        low_coeffs: CoefficientsDict,
-        high_coeffs: CoefficientsDict,
+        T_range: tuple[float, ...],
+        coeffs: list[CoefficientsDict],
     ):
-        self.lowest_T = lowest_T
-        self.mid_T = mid_T
-        self.highest_T = highest_T
-        self.low_coeffs = low_coeffs
-        self.high_coeffs = high_coeffs
-
-    def __call__(self, T: float) -> CoefficientsDict:
-        if T < self.lowest_T:
-            warnings.warn(
-                "Temperature is below the lowest temperature of the Shomate coefficients.Returning low T parametrization"
+        if len(T_range) + 1 != len(coeffs):
+            raise ValueError(
+                "Number of temperature ranges must be one more than the number of coefficients."
             )
-            return self.low_coeffs
-        elif T < self.mid_T:
-            return self.low_coeffs
-        elif T < self.highest_T:
-            return self.high_coeffs
-        else:
-            warnings.warn(
-                "Temperature is above the highest temperature of the Shomate coefficients. Returning high T parametrization"
-            )
-            return self.high_coeffs
-
-
-class constShomateCoefficients(ShomateCoefficients):
-    def __init__(self, coeffs: CoefficientsDict):
-        self.lowest_T = (0,)
-        self.mid_T = (np.nan,)
-        self.highest_T = (np.inf,)
+        self.T_range = T_range
         self.coeffs = coeffs
 
     def __call__(self, T: float) -> CoefficientsDict:
-        return self.coeffs
+        for i, T_bound in enumerate(self.T_range):
+            if T <= T_bound:
+                if i == 0:
+                    warnings.warn(
+                        "Temperature is below the lowest temperature of the Shomate coefficients."
+                    )
+                    return self.coeffs[i]
+                return self.coeffs[i - 1]
+        else:
+            warnings.warn(
+                "Temperature is above the highest temperature of the Shomate coefficients."
+            )
+            return self.coeffs[-1]
+
+
+class constShomateCoefficients(ShomateCoefficients):
+    def __init__(self, coeffs: list[CoefficientsDict]):
+        self.T_range = (0, np.inf)
+        self.coeffs = coeffs
+
+    def __call__(self, T: float) -> CoefficientsDict:
+        return self.coeffs[0]
 
 
 class Shomate:
@@ -73,7 +69,7 @@ class Shomate:
         self,
         name_str: str,
         Shomate_coeffs: ShomateCoefficients,
-        H_0_ref: float = 0,
+        H_0_ref: float = 0.0,
     ):
         self.name_str = name_str
         self.coeffs = Shomate_coeffs
@@ -93,12 +89,13 @@ class Shomate:
             heat capacity at constant pressure in J/mol/K
         """
         t = T / 1000
+        coeffs = self.coeffs(T)
         c_P = (
-            self.coeffs(T)["A"]
-            + self.coeffs(T)["B"] * t
-            + self.coeffs(T)["C"] * t**2
-            + self.coeffs(T)["D"] * t**3
-            + self.coeffs(T)["E"] / t**2
+            coeffs["A"]
+            + coeffs["B"] * t
+            + coeffs["C"] * t**2
+            + coeffs["D"] * t**3
+            + coeffs["E"] / t**2
         )
         return c_P
 
@@ -116,13 +113,14 @@ class Shomate:
             entropy at standard conditions in J/mol/K
         """
         t = T / 1000
+        coeffs = self.coeffs(T)
         S = (
-            self.coeffs(T)["A"] * np.log(t)
-            + self.coeffs(T)["B"] * t
-            + self.coeffs(T)["C"] * t**2 / 2
-            + self.coeffs(T)["D"] * t**3 / 3
-            - self.coeffs(T)["E"] / (2 * t**2)
-            + self.coeffs(T)["G"]
+            coeffs["A"] * np.log(t)
+            + coeffs["B"] * t
+            + coeffs["C"] * t**2 / 2
+            + coeffs["D"] * t**3 / 3
+            - coeffs["E"] / (2 * t**2)
+            + coeffs["G"]
         )
         return S
 
@@ -140,14 +138,15 @@ class Shomate:
             enthalpydifference to reference state in J/mol
         """
         t = T / 1000
+        coeffs = self.coeffs(T)
         H = (
-            self.coeffs(T)["A"] * t
-            + self.coeffs(T)["B"] * t**2 / 2
-            + self.coeffs(T)["C"] * t**3 / 3
-            + self.coeffs(T)["D"] * t**4 / 4
-            - self.coeffs(T)["E"] / t
-            + self.coeffs(T)["F"]
-            - self.coeffs(T)["H"]
+            coeffs["A"] * t
+            + coeffs["B"] * t**2 / 2
+            + coeffs["C"] * t**3 / 3
+            + coeffs["D"] * t**4 / 4
+            - coeffs["E"] / t
+            + coeffs["F"]
+            - coeffs["H"]
         )
         return H * 1000
 
@@ -188,6 +187,7 @@ def Delta_R_H_0(
     float
         reaction enthalphy in J/mol
     """
+    nus = np.asarray(nus)
     return sum([nu * component.H_0(T) for nu, component in zip(nus, components)])
 
 
@@ -212,6 +212,7 @@ def Delta_R_S_0(
     float
         reaction entropy in J/mol/K
     """
+    nus = np.asarray(nus)
     return sum([nu * component.S_0(T) for nu, component in zip(nus, components)])
 
 
@@ -248,93 +249,93 @@ def K_std(
 
 
 N2_c = ShomateCoefficients(
-    100,
-    500,
-    2000,
-    low_coeffs=CoefficientsDict(
-        [
-            28.98641,
-            1.853978,
-            -9.647459,
-            16.63537,
-            0.000117,
-            -8.671914,
-            226.4168,
-            0,
-        ]
-    ),
-    high_coeffs=CoefficientsDict(
-        [
-            19.50583,
-            19.88705,
-            -8.598535,
-            1.369784,
-            0.527601,
-            -4.935202,
-            212.3900,
-            0,
-        ]
-    ),
+    T_range=(100, 500, 2000),
+    coeffs=[
+        CoefficientsDict(
+            [
+                28.98641,
+                1.853978,
+                -9.647459,
+                16.63537,
+                0.000117,
+                -8.671914,
+                226.4168,
+                0,
+            ]
+        ),
+        CoefficientsDict(
+            [
+                19.50583,
+                19.88705,
+                -8.598535,
+                1.369784,
+                0.527601,
+                -4.935202,
+                212.3900,
+                0,
+            ]
+        ),
+    ],
 )
 
 H2_c = ShomateCoefficients(
-    298,
-    1000,
-    2500,
-    low_coeffs=CoefficientsDict(
-        [
-            33.066178,
-            -11.363417,
-            11.432816,
-            -2.772874,
-            -0.158558,
-            -9.980797,
-            172.707974,
-            0,
-        ]
-    ),
-    high_coeffs=CoefficientsDict(
-        [
-            18.563083,
-            12.257357,
-            -2.859786,
-            0.268238,
-            1.977990,
-            -1.147438,
-            156.288133,
-            0,
-        ]
-    ),
+    T_range=(298, 1000, 2500),
+    coeffs=[
+        CoefficientsDict(
+            [
+                33.066178,
+                -11.363417,
+                11.432816,
+                -2.772874,
+                -0.158558,
+                -9.980797,
+                172.707974,
+                0,
+            ]
+        ),
+        CoefficientsDict(
+            [
+                18.563083,
+                12.257357,
+                -2.859786,
+                0.268238,
+                1.977990,
+                -1.147438,
+                156.288133,
+                0,
+            ]
+        ),
+    ],
 )
 
 NH3_c = ShomateCoefficients(
-    298,
-    1400,
-    6000,
-    low_coeffs=CoefficientsDict(
-        [
-            19.99563,
-            49.77119,
-            -15.37599,
-            1.921168,
-            0.189174,
-            -53.30667,
-            203.8591,
-            -45.89806,
-        ]
-    ),
-    high_coeffs=CoefficientsDict(
-        [
-            52.02427,
-            18.48801,
-            -3.765128,
-            0.248541,
-            -12.45799,
-            -85.53895,
-            223.8022,
-            -45.89806,
-        ]
-    ),
+    T_range=(298, 1400, 6000),
+    coeffs=[
+        CoefficientsDict(
+            [
+                19.99563,
+                49.77119,
+                -15.37599,
+                1.921168,
+                0.189174,
+                -53.30667,
+                203.8591,
+                -45.89806,
+            ]
+        ),
+        CoefficientsDict(
+            [
+                52.02427,
+                18.48801,
+                -3.765128,
+                0.248541,
+                -12.45799,
+                -85.53895,
+                223.8022,
+                -45.89806,
+            ]
+        ),
+    ],
 )
 
 N2 = Shomate("N2", N2_c)
