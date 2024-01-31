@@ -225,7 +225,7 @@ class EqNet(pl.LightningModule):
 
 
 dm = DataModule(
-    path=Path.cwd() / "HSA_001_XXX" / "data" / "eq_dataset.npz",
+    path=Path.cwd() / "HSA_001_XXX" / "data" / "eq_dataset_uniform.npz",
     batch_size=256,
 )
 
@@ -271,7 +271,7 @@ wandb.finish()
 
 torch.save(
     model.net.state_dict(),
-    Path.cwd() / "models" / "torch" / "extended_NH3_net.pt",
+    Path.cwd() / "models" / "torch" / "NH3_net_uniform.pt",
 )
 
 # onnx_program = torch.onnx.dynamo_export(model.net, torch.rand((5,)))
