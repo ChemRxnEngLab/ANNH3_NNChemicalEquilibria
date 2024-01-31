@@ -165,6 +165,27 @@ class Shomate:
         """
         return self.Delta_H_0(T) + self.H_0_ref
 
+    def Delta_f_H_0(
+        self,
+        nus: npt.ArrayLike,
+        elements: list["ElementShomate"],
+        T: float,
+    ) -> float:
+        """calculates the formation enthalpy of the species from the elements
+
+        Parameters
+        ----------
+        T : float
+            Temperature in Kelvin
+
+        Returns
+        -------
+        float
+            enthalpydifference to reference state in J/mol
+        """
+        nus = np.asarray(nus)
+        return sum([nu * element.H_0(T) for nu, element in zip(nus, elements)])
+
 
 class ElementShomate(Shomate):
     def __init__(
@@ -174,7 +195,7 @@ class ElementShomate(Shomate):
     ):
         super().__init__(name_str, Shomate_coeffs, 0)
 
-    def Delta_f_H_0(self, T: float) -> float:
+    def Delta_f_H_0(self, T: float) -> float:  # type: ignore
         """calculates the formation enthalpy of the species
 
         Parameters
@@ -212,7 +233,9 @@ def Delta_R_H_0(
         reaction enthalphy in J/mol
     """
     nus = np.asarray(nus)
-    return sum([nu * component.H_0(T) for nu, component in zip(nus, components)])
+    return sum(
+        [nu * component.Delta_f_H_0(T) for nu, component in zip(nus, components)]
+    )
 
 
 def Delta_R_S_0(
