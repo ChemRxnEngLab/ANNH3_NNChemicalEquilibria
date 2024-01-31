@@ -18,7 +18,7 @@ plt.style.use("ICIWstyle")
 
 cm2inch = 1 / 2.54
 
-figsize = (7 * cm2inch, 7 * cm2inch)
+figsize = (15 * cm2inch, 7 * cm2inch)
 
 pos_params = {
     "left_h": 1.7 * cm2inch,
@@ -86,7 +86,7 @@ for i in range(0, len(p_plot1)):
 
 
 # xi über T bei unterschiedlichen p
-fig1, ax1 = plt.subplots()
+fig1, ax1 = plt.subplots(figsize=figsize)
 
 colors = ["rebeccapurple", "teal", "orange", "limegreen", "crimson"]
 
