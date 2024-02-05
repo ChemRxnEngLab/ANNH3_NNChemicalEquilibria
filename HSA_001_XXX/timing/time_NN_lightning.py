@@ -1,72 +1,58 @@
-from typing import Any
-import torch
-from torch import nn
-from torch.utils.data import TensorDataset, DataLoader, random_split
-from torch.optim.lr_scheduler import ReduceLROnPlateau
-import torchmetrics as tm
-import numpy as np
+# Importe / Bibliotheken
 from pathlib import Path
-import wandb
-
+import numpy as np
+import torch
 import lightning.pytorch as pl
-from lightning.pytorch.callbacks import LearningRateMonitor
-from lightning.pytorch.loggers.wandb import WandbLogger
-
+from typing import Any
+from scipy.optimize import root
+import matplotlib.pyplot as plt
+from scipy.constants import R
+import timeit
 import sys
 
 sys.path.append(str(Path.cwd() / "lib_nets"))
-from Nets.EQ_Net_B import NeuralNetwork
+print(sys.path)
 
-wandb.login()
 
+from Nets.EQ_Net_A import NeuralNetwork
+from GGW_calc.GGW import GGW
+from ICIW_Plots import make_square_ax
+
+import logging
+
+logging.getLogger("lightning.pytorch").setLevel(logging.ERROR)
+
+# Parameter
+num = 10_000_000  # Anzahl der Werte im Vektor
+
+np.random.seed(42)
+
+T = np.random.uniform(408.15, 1273.15, num)  # K Temperatur
+p = np.random.uniform(1, 500, num)  # bar Druck
+
+T = torch.tensor(T)
+p = torch.tensor(p)
+
+# Stofffmengen zu Reaktionsbeginn
+n_ges_0 = 1  # mol Gesamtstoffmenge zum Reaktionsbeginn
+x_0 = np.random.dirichlet((1, 1, 1), num)  # 1 Stoffmengenanteile zu Reaktionsbeginn
+n_H2_0 = x_0[:, 0] * n_ges_0  # mol Stoffmenge H2 Start
+n_N2_0 = x_0[:, 1] * n_ges_0  # mol Stoffmenge N2 Start
+n_NH3_0 = x_0[:, 2] * n_ges_0  # mol Stoffmenge NH3 Start
+
+n_H2_0 = torch.tensor(n_H2_0)
+n_N2_0 = torch.tensor(n_N2_0)
+n_NH3_0 = torch.tensor(n_NH3_0)
+
+X = torch.stack((T, p, n_H2_0, n_N2_0, n_NH3_0), dim=1)
+
+##load the network
 torch.set_default_dtype(torch.float64)
 
-
-class DataModule(pl.LightningDataModule):
-    def __init__(self, path, batch_size=256):
-        super().__init__()
-        self.path = path
-        self.batch_size = batch_size
-
-    def prepare_data(self):
-        data_1 = np.load(self.path)
-        T = torch.tensor(data_1["T"])
-        p = torch.tensor(data_1["p"])
-        x_0 = torch.tensor(data_1["x_0"])
-        x_eq = torch.tensor(data_1["x"])
-
-        # print(T.shape, p.shape, x_0.shape, x_eq.shape)
-
-        X = torch.cat((T[:, None], p[:, None], x_0), 1)
-        y = x_eq[:, [0, 2]]
-
-        self.data = TensorDataset(X, y)
-        self.train_dataset, self.val_dataset, self.test_dataset = random_split(
-            self.data, [0.7, 0.1, 0.2]
-        )
-
-    def train_dataloader(self):
-        return DataLoader(
-            self.train_dataset,
-            batch_size=self.batch_size,
-            shuffle=True,
-        )
-
-    def test_dataloader(self):
-        return DataLoader(
-            self.test_dataset,
-            batch_size=self.batch_size,
-            shuffle=False,
-        )
-
-    def val_dataloader(self):
-        return DataLoader(
-            self.val_dataset,
-            batch_size=self.batch_size,
-            shuffle=False,
-        )
+net_file = Path.cwd() / "models" / "torch" / "NH3_net_uniform.pt"
 
 
+# load model
 class EqNet(pl.LightningModule):
     def __init__(
         self,
@@ -170,13 +156,6 @@ class EqNet(pl.LightningModule):
         return ret_dict
 
 
-dm = DataModule(
-    path=Path.cwd() / "HSA_001_XXX" / "data" / "eq_dataset.npz",
-    batch_size=256,
-)
-
-dm.prepare_data()
-
 model = EqNet(
     5,
     200,
@@ -184,36 +163,59 @@ model = EqNet(
     200,
     2,
 )
-my_logger = WandbLogger(
-    project="NH3_eqnet",
-    save_dir=Path.cwd() / "logs",
-    log_model=True,
-    tags=["BatchNorm"],
-)
-lr_monitor = LearningRateMonitor(logging_interval="epoch")
+
+model.net.load_state_dict(torch.load(net_file))
+for name, param in model.named_parameters():
+    print(f"name:     {name}")
+    print(f"shape:    {param.shape}")
+    print(f"req_grad: {param.requires_grad}")
+    print("data:")
+    print(param.data)
+
 Trainer = pl.Trainer(
     accelerator="cuda",
-    devices=1,
-    max_epochs=1000,
-    callbacks=[
-        lr_monitor,
-    ],
-    logger=my_logger,
-    deterministic=True,
+    enable_progress_bar=False,
 )
 
-Trainer.fit(model, dm)
-Trainer.test(model, dm)
 model.eval()
 
-wandb.finish()
 
-torch.save(
-    model.net.state_dict(),
-    Path.cwd() / "models" / "torch" / "extended_NH3_net_BatchNorm.pt",
-)
-# model.to_onnx(
-#     Path.cwd() / "models" / "onnx" / "extended_NH3_net_BatchNorm.onnx",
-#     input_sample=torch.rand((5,)),
-#     export_params=True,
-# )
+# dl = torch.utils.data.DataLoader(X, batch_size=100_000, shuffle=False, num_workers=8)
+def calc_data():
+    # Aufruf der GGW-Funktion und Berechnung der Stoffmengen im GGW
+    # print(X_.shape)
+    Trainer.predict(model, X_)
+
+
+def main():
+    ns = np.logspace(1, 6, 6, dtype=int, base=10, endpoint=True)
+    n_t = np.sum(ns)
+    ts = np.empty_like(ns, dtype=float)
+    print(ns)
+    global X_
+    for i, n in enumerate(ns):
+        X_ = torch.utils.data.DataLoader(
+            X[:n],
+            batch_size=int(1e6),
+            shuffle=False,
+        )
+
+        calc_data()
+        t = timeit.timeit(
+            "calc_data()",
+            globals=globals(),
+            number=10,
+        )
+        print(f"{n:<10}:{t:.5f}")
+        v = t / n
+        n_t = n_t - n
+        print(f"\tit/s: {1/v:.3f}")
+        eta = 10 * n_t * v
+        print(f"\tETA: {eta:.2f}s")
+        ts[i] = t
+
+    np.savez("HSA_001_XXX/timing/time_NN_gpu_1E6.npz", ns=ns, ts=ts)
+
+
+if __name__ == "__main__":
+    main()

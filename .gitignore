@@ -1,4 +1,5 @@
 logs/
+lightning_logs/
 wandb/
 __pycache__/
 .mypy_cache/
