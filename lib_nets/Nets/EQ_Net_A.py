@@ -21,10 +21,8 @@ class NeuralNetwork(nn.Module):
         # Kaskade der Layer
         self.linear_afunc_stack = nn.Sequential(
             # nn.BatchNorm1d(input_size), # Normalisierung, damit Inputdaten gleiche Größenordnung haben
-            nn.Linear(
-                input_size, hidden1_size
-            ),  # Lineare Transformation mit gespeicherten weights und biases
-            nn.GELU(),  # Nicht lineare Aktivierungsfunktion um komplexe nichtlineare Zusammenhänge abzubilden
+            nn.Linear(input_size, hidden1_size),
+            nn.GELU(),
             nn.Linear(hidden1_size, hidden2_size),
             nn.GELU(),
             nn.Linear(hidden2_size, hidden3_size),

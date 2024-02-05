@@ -13,12 +13,16 @@ class NeuralNetwork(nn.Module):
         hidden2_size: int,
         hidden3_size: int,
         output_size: int,
+        norm_momentum: float = 0.2,
     ):
         super().__init__()  # Referenz zur Base Class (nn.Module)
         # Kaskade der Layer
         layers: OrderedDict[str, nn.Module] = OrderedDict(
             [
-                ("BatchNorm", nn.BatchNorm1d(input_size, momentum=0.2, affine=False)),
+                (
+                    "BatchNorm",
+                    nn.BatchNorm1d(input_size, momentum=norm_momentum, affine=False),
+                ),
                 ("Linear1", nn.Linear(input_size, hidden1_size)),
                 ("GELU1", nn.GELU()),
                 ("Linear2", nn.Linear(hidden1_size, hidden2_size)),
