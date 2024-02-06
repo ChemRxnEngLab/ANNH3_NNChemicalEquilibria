@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.optimize import root
+from scipy.constants import R
 
 # Stoechiometrische Koeffizienten Ammoniaksynthese
 v_H2 = -3
@@ -15,7 +16,6 @@ N2 = index[1]
 NH3 = index[2]
 
 # Konstanten
-R = 8.31448  # J mol^-1 K^-1 Ideale Gaskonstane
 p_0 = 1  # bar Standarddruck
 
 # Standardbildungsenthalpie delta_f_H_0_ref; NIST; [H2, N2, NH3]
