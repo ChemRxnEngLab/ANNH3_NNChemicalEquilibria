@@ -1,13 +1,11 @@
-# Erzeugung von Gleichgewichtsdaten Ammoniaksynthese
-
-# Importe / Bibliotheken
+# Imports
 from pathlib import Path
 import numpy as np
 from scipy.stats import loguniform
 from lib_nets.GGW_calc.GGW import GGW
 
-# Parameter
-num = 1_000_000  # Anzahl der Werte im Vektor
+# Parameters
+num = 1_000_000  # number of training samples
 
 T = np.random.uniform(408.15, 1273.15, num)  # K temperature
 p = loguniform.rvs(1, 500, size=num)  # bar pressure
@@ -30,24 +28,23 @@ if not data_path.exists():
 if data_file.exists():
     print("orerriding existing data file")
 
-# Aufruf der GGW-Funktion und Berechnung der Stoffmengen im GGW
+# calculate EQ for each sample
 xi = np.zeros_like(n_H2_0)
 for i in range(0, len(n_H2_0)):
-    # print(i)
     if i % 1000 == 0:
         print(f"{i} of {num}")
     xi[i], _, _ = GGW(T[i], p[i], n_0[i, :])
 
-# Berechnung der Stoffmengen im Gleichgewicht
+# calculate the EQ-composition
 v_H2 = -3
 v_N2 = -1
 v_NH3 = 2
 
-n_H2 = xi * v_H2 + n_H2_0  # mol Stoffmenge H2 Gleichgewicht
-n_N2 = xi * v_N2 + n_N2_0  # mol Stoffmenge N2 Gleichgewicht
-n_NH3 = xi * v_NH3 + n_NH3_0  # mol Stoffmenge NH3 Gleichgewicht
-n_ges = n_H2 + n_N2 + n_NH3  # mol Gesamtstoffmenge Gleichgewicht
-x = (np.array([n_H2, n_N2, n_NH3]) / n_ges).T  # 1 Stoffmengenanteile im Gleichgewicht
+n_H2 = xi * v_H2 + n_H2_0  # mol amount H2 in Eq
+n_N2 = xi * v_N2 + n_N2_0  # mol amount N2 in Eq
+n_NH3 = xi * v_NH3 + n_NH3_0  # mol amount NH3 in Eq
+n_ges = n_H2 + n_N2 + n_NH3  # mol total amount in Eq
+x = (np.array([n_H2, n_N2, n_NH3]) / n_ges).T  # 1 molar fractions in Eq
 
-# %% Speichern der GGW Daten
+# save data
 np.savez(data_file, T=T, p=p, x_0=x_0, x=x)

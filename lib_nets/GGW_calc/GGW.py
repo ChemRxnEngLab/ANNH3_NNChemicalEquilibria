@@ -2,27 +2,27 @@ import numpy as np
 from scipy.optimize import root
 from scipy.constants import R
 
-# Stoechiometrische Koeffizienten Ammoniaksynthese
+# stoichiometric coefficients NH3 synthesis
 v_H2 = -3
 v_N2 = -1
 v_NH3 = 2
 
 v = [v_H2, v_N2, v_NH3]
 
-# Index der Stoffe in Arrays: [H2, N2, NH3]
+# component indices: [H2, N2, NH3]
 index = np.array([0, 1, 2])
 H2 = index[0]
 N2 = index[1]
 NH3 = index[2]
 
-# Konstanten
-p_0 = 1  # bar Standarddruck
+# constants
+p_0 = 1  # bar standard pressure
 
-# Standardbildungsenthalpie delta_f_H_0_ref; NIST; [H2, N2, NH3]
-delta_f_H_0_ref = np.array([0.0, 0.0, -45.90])  # kJ mol^-1 Standardtemperatur
+# standardenthalpy of formation delta_f_H_0_ref; NIST; [H2, N2, NH3]
+delta_f_H_0_ref = np.array([0.0, 0.0, -45.90])  # kJ mol^-1 at 298 K
 
 
-# Shomate-Gleichungen
+# Shomate-Eqs
 def shomate_S(T, stoff, A, B, C, D, E, F, G, H):
     t = T / 1000
     S = (
@@ -51,12 +51,12 @@ def shomate_H(T, stoff, A, B, C, D, E, F, G, H):
     return H_0
 
 
-# Standardbildungsenthalpie delta_f_H_0
+# Enthalpy of formation delta_f_H_0 at arbitrary temperature
 def delta_f_H_0(T, stoff, A, B, C, D, E, F, G, H):
-    # N2 oder H2 --> Standardbildungsenthalpie == 0
+    # N2 / H2 --> delta_f_H_0 == 0
     if stoff != 2:
         delta_f_H_0 = 0.0
-    # NH3 Berechnung der Standardbildungsenthalpie aus Shomate-Enthalpie
+    # NH3 Berechnung der delta_f_H_0 from Shomate-Enthalpy
     else:
         delta_f_H_0 = (
             (v_NH3 / v_NH3) * shomate_H(T, NH3, A, B, C, D, E, F, G, H)
@@ -66,8 +66,26 @@ def delta_f_H_0(T, stoff, A, B, C, D, E, F, G, H):
     return delta_f_H_0
 
 
-# Gleichgewichtsberechnung
-def GGW(T, p, n):
+# Equilibrium algorith
+def GGW(T: float, p: float, n: list[float]) -> tuple[float, float, float]:
+    """calculates the equilibrium of the NH3 synthesis through stiochiometric Law
+    of mass action with Shomate-Equations
+
+    Parameters
+    ----------
+    T : float
+        Temperature of reaction mixture in K
+    p : float
+        pressure of reaction mixture in bar
+    n : list[float]
+        molar amounts of [H2, N2, NH3]
+
+    Returns
+    -------
+    tuple[float, float, float]
+        extent of reaction in equilibrium, specific EQ-constant K_x, EQ-constant K_0
+
+    """
     n_H2_0, n_N2_0, n_NH3_0 = n
     n_ges_0 = n_H2_0 + n_N2_0 + n_NH3_0
     # Shomate Koeffizienten; NIST; [H2, N2, NH3]
@@ -103,49 +121,44 @@ def GGW(T, p, n):
     else:
         raise Warning("Temperature is too high.")
 
-    # Standardreaktionsenthalpie delta_R_H_0
+    # Enthalpy of reaction delta_R_H_0
     delta_R_H_0 = (
         v_H2 * delta_f_H_0(T, H2, A, B, C, D, E, F, G, H)
         + v_N2 * delta_f_H_0(T, N2, A, B, C, D, E, F, G, H)
         + v_NH3 * delta_f_H_0(T, NH3, A, B, C, D, E, F, G, H)
     ) * 1000  # J mol^-1
 
-    # Standardreaktionsentropie delta_R_S_0
+    # Entropy of reaction delta_R_S_0
     delta_R_S_0 = (
         v_H2 * shomate_S(T, H2, A, B, C, D, E, F, G, H)
         + v_N2 * shomate_S(T, N2, A, B, C, D, E, F, G, H)
         + v_NH3 * shomate_S(T, NH3, A, B, C, D, E, F, G, H)
     )  # J mol^-1 K^-1
 
-    # freie Standard Reaktionsenthalpie delta_R_G_0
+    # Gibbs enthalpy delta_R_G_0
     delta_R_G_0 = delta_R_H_0 - T * delta_R_S_0  # J mol^-1
 
-    # allgemeine GGW-Konstante K_0
+    # EQ-constant K_0
     K_0 = np.exp((-delta_R_G_0) / (T * R))  # 1
 
-    # spezifische GGW-Konstante K_x
-    K_x = K_0 * (p_0 / p) ** (
-        sum(v)
-    )  # 1 (Summe der stoechiometrischen Koeffizienten im Exponenten)
+    # specific EQ-constant K_x
+    K_x = K_0 * (p_0 / p) ** (sum(v))
 
-    # Numerische Loesung
-    # Definition der Funktion
+    # numeric solution
     def fun(xi):
         return (n_NH3_0 + 2 * xi) ** 2 * (n_ges_0 - 2 * xi) ** 2 - K_x * (
             n_H2_0 - 3 * xi
         ) ** 3 * (n_N2_0 - xi)
 
-    # Bestimmung Startwert
+    # initial guess
     xi_0 = (-0.5 * n_NH3_0 + min(n_N2_0, 1 / 3 * n_H2_0)) / 2
-    # xi_0 = np.full_like(K_x, xi_0) # bei Uebergabe T_array
 
-    # Lösung Polynom
+    # numeric solution
     sol = root(fun, xi_0)
-    xi = sol.x  # mol Reaktionslaufzahl
+    xi = sol.x  # mol extent of reaction
 
-    # Kontrolle: physikalisch moegliche Loesung?
+    # check if solution is valid
     if xi < (-0.5 * n_NH3_0) or xi > min(n_N2_0, 1 / 3 * n_H2_0):
-        # Fehlermeldung
         raise Warning("Impossible value for xi.")
 
     return (xi, K_x, K_0)
