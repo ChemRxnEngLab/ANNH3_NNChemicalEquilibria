@@ -12,8 +12,8 @@ sys.path.append(str(Path.cwd() / "lib_nets"))
 print(sys.path)
 
 
-from Nets.EQ_Net_A import NeuralNetwork
-from GGW_calc.GGW import GGW
+from lib_nets.Nets.EQ_Net_A import NeuralNetwork
+from lib_nets.GGW_calc.GGW import GGW
 from ICIW_Plots import make_square_ax
 
 
@@ -44,7 +44,8 @@ X = torch.stack((T, p, n_H2_0, n_N2_0, n_NH3_0), dim=1)
 ##load the network
 torch.set_default_dtype(torch.float64)
 
-net_file = Path.cwd() / "models" / "torch" / "NH3_net_uniform.pt"
+net_file = 'C:/Users/TheresaKunz/Python/AG_Güttel_GIT/sr-03-23/models/torch/NH3_net_uniform.pt'
+# Path.cwd() / "sr-03-23" / "models" / "torch" / "NH3_net_uniform.pt"
 
 # load model
 net = NeuralNetwork(
@@ -88,7 +89,7 @@ def main():
         print(f"\tETA: {eta:.2f}s")
         ts[i] = t
 
-    np.savez("HSA_001_XXX/timing/time_NN_cpu.npz", ns=ns, ts=ts)
+    np.savez("C:/Users/TheresaKunz/Python/AG_Güttel_GIT/sr-03-23/HSA_001_XXX/timing/time_NN_cpu.npz", ns=ns, ts=ts)
 
 
 if __name__ == "__main__":
