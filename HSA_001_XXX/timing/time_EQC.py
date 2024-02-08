@@ -50,7 +50,7 @@ def main():
         print(f"\tETA: {eta:.2f}s")
         ts[i] = t
 
-    np.savez("HSA_001_XXX/timing/time_EQC.npz", ns=ns, ts=ts)
+    np.savez("C:/Users/TheresaKunz/Python/AG_Güttel_GIT/sr-03-23/HSA_001_XXX/timing/time_EQC.npz", ns=ns, ts=ts)
 
 
 if __name__ == "__main__":
