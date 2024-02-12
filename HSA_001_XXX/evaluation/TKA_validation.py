@@ -5,8 +5,10 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 from matplotlib.patches import ConnectionPatch
 import sys
+from matplotlib.lines import Line2D
 
 sys.path.append(str(Path.cwd() / "lib_nets"))
+print(Path.cwd())
 print(sys.path)
 
 
@@ -18,7 +20,8 @@ plt.style.use("ICIWstyle")
 
 cm2inch = 1 / 2.54
 
-figsize = (15 * cm2inch, 7 * cm2inch)
+# figsize = (15 * cm2inch, 7 * cm2inch)
+figsize = (10.5 * cm2inch, 5.5 * cm2inch)
 
 pos_params = {
     "left_h": 1.7 * cm2inch,
@@ -57,7 +60,7 @@ x_0_plot = np.array([0.762, 0.238, 0])
 n = n_ges_0_plot * x_0_plot
 
 # Diagramm1: Parameter zur Berechnung von xi über T bei versch. Druecken
-T_plot1 = np.linspace(300+273.15, 550+273.15, num=num_plot)  # K Temperatur
+T_plot1 = np.linspace(300 + 273.15, 550 + 273.15, num=num_plot)  # K Temperatur
 p_plot1 = np.array([10, 30, 50, 100]) * 1.01325  # bar Druck;
 
 # Aufrufen der Funktion zur Berechnung von xi mit Shomate
@@ -86,11 +89,20 @@ for i in range(0, len(p_plot1)):
 
 # validation data (Larson 1923, doi.org/10.1021/ja01665a017)
 
-T_larson = np.array([ 325,   350,   375,   400,   425,   450,   475,   500]) + 273.15 # temperature in K
-larson = np.array([[10.38,  7.35,  5.25,  3.85,  2.80,  2.04,  1.61,  1.20],        # 10 atm, x_NH3 in 1
-                   [   -1, 17.80, 13.35, 10.09,  7.59,  5.80,  4.53,  3.48],        # 30 atm
-                   [   -1, 25.11, 19.44, 15.11, 11.71,  9.17,  7.13,  5.58],        # 50 atm
-                   [   -1,    -1, 30.95, 24.91, 20.23, 16.35, 12.98, 10.40]]) / 100 # 100 atm
+T_larson = (
+    np.array([325, 350, 375, 400, 425, 450, 475, 500]) + 273.15
+)  # temperature in K
+larson = (
+    np.array(
+        [
+            [10.38, 7.35, 5.25, 3.85, 2.80, 2.04, 1.61, 1.20],  # 10 atm, x_NH3 in 1
+            [-1, 17.80, 13.35, 10.09, 7.59, 5.80, 4.53, 3.48],  # 30 atm
+            [-1, 25.11, 19.44, 15.11, 11.71, 9.17, 7.13, 5.58],  # 50 atm
+            [-1, -1, 30.95, 24.91, 20.23, 16.35, 12.98, 10.40],
+        ]
+    )
+    / 100
+)  # 100 atm
 
 # xi über T bei unterschiedlichen p
 fig1, ax1 = plt.subplots(figsize=figsize)
@@ -111,8 +123,8 @@ for j in range(larson.shape[0]):
         T_larson,
         larson[j, :],
         "+",
-        label = f"$p$ = {p_plot1[j]/1.01325} atm (Larson)",
-        color = colors[j],
+        label=f"$p$ = {p_plot1[j]/1.01325} atm (Larson)",
+        color=colors[j],
     )
     # ax1.plot(
     #     T_plot1,
@@ -131,49 +143,49 @@ ax1.set(
 # ax1.tick_params(direction="in", length=20, width=3)
 ax1.set(xlim=(T_plot1[0], T_plot1[-1]))
 
-leg1 = ax1.legend(frameon=True)  # Legende anzeigen
+legend_handles = [
+    Line2D(
+        [0, 0],
+        [0, 0],
+        color=colors[0],
+        lw=2,
+        label=f"$p$ = {p_plot1[0]/1.01325} atm",
+    ),
+    Line2D(
+        [0, 0],
+        [0, 0],
+        color=colors[1],
+        lw=2,
+        label=f"$p$ = {p_plot1[1]/1.01325} atm",
+    ),
+    Line2D(
+        [0, 0],
+        [0, 0],
+        color=colors[2],
+        lw=2,
+        label=f"$p$ = {p_plot1[2]/1.01325} atm",
+    ),
+    Line2D(
+        [0, 0],
+        [0, 0],
+        color=colors[3],
+        lw=2,
+        label=f"$p$ = {p_plot1[3]/1.01325} atm",
+    ),
+    Line2D(
+        [0, 0],
+        [0, 0],
+        linestyle="None",
+        marker="+",
+        color="k",
+        lw=2,
+        label="Larson exp. data",
+    ),
+]
+
+leg1 = ax1.legend(handles=legend_handles, frameon=True)  # Legende anzeigen
 # leg1.get_frame().set_edgecolor("k")  # schwarzer Kasten um Legende
 # leg1.get_frame().set_linewidth(3)  # Linienstärke Kasten um Legende
-
-# ### the trained area
-# # The trained temperature range
-# cond_idcs = np.where(np.logical_and(T_plot1 > 408.15, T_plot1 < 1273.15))[0]
-# print(cond_idcs)
-# T_trained = T_plot1[cond_idcs]
-# print(T_trained.shape)
-# print(T_trained)
-# fill = ax1.fill_between(
-#     T_trained,
-#     x_plot1[cond_idcs, 0, 2],
-#     x_plot1[cond_idcs, 3, 2],
-#     color="lightgray",
-#     alpha=1,
-#     zorder=1,
-# )  # , label = 'Haber-Bosch')#,alpha = 0.6)
-#
-# # Beschriftung Fläche
-# (x0, y0), (x1, y1) = fill.get_paths()[0].get_extents().get_points()
-# middle_x = (x0 + x1) / 2
-# middle_y = (y0 + y1) / 2
-# ax1.text(
-#     800,
-#     (y0 + y1) / 2 + 0.2,
-#     "Trained\narea",
-#     ha="center",
-#     va="bottom",
-#     fontsize=11,
-#     color="black",
-#     zorder=100,
-# )
-# con = ConnectionPatch(
-#     xyA=(700, 0.25),
-#     coordsA=ax1.transData,
-#     xyB=(800, (y0 + y1) / 2 + 0.2),
-#     coordsB=ax1.transData,
-#     lw=0.7,
-#     zorder=99,
-# )
-# ax1.add_artist(con)
 
 
 plt.tight_layout()
