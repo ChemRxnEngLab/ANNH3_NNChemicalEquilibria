@@ -61,7 +61,7 @@ n = n_ges_0_plot * x_0_plot
 
 # Diagramm1: Parameter zur Berechnung von xi über T bei versch. Druecken
 T_plot1 = np.linspace(300 + 273.15, 550 + 273.15, num=num_plot)  # K Temperatur
-p_plot1 = np.array([10, 30, 50, 100]) * 1.01325  # bar Druck;
+p_plot1 = np.array([10, 30, 50, 100, 300, 600, 1000]) * 1.01325  # bar Druck;
 
 # Aufrufen der Funktion zur Berechnung von xi mit Shomate
 K_x_plot1 = np.zeros((num_plot, len(p_plot1)))
@@ -87,7 +87,7 @@ for i in range(0, len(p_plot1)):
         #     .numpy()
         # )
 
-# validation data (Larson 1923, doi.org/10.1021/ja01665a017)
+# validation data (Larson 1923, doi.org/10.1021/ja01665a017 and Larson 1924, doi.org/10.1021/ja01667a011)
 
 T_larson = (
     np.array([325, 350, 375, 400, 425, 450, 475, 500]) + 273.15
@@ -95,19 +95,22 @@ T_larson = (
 larson = (
     np.array(
         [
-            [10.38, 7.35, 5.25, 3.85, 2.80, 2.04, 1.61, 1.20],  # 10 atm, x_NH3 in 1
-            [-1, 17.80, 13.35, 10.09, 7.59, 5.80, 4.53, 3.48],  # 30 atm
-            [-1, 25.11, 19.44, 15.11, 11.71, 9.17, 7.13, 5.58],  # 50 atm
-            [-1, -1, 30.95, 24.91, 20.23, 16.35, 12.98, 10.40],
+            [10.38,  7.35,  5.25,  3.85,  2.80,  2.04,  1.61,  1.20], # 10 atm, x_NH3 in %
+            [   -1, 17.80, 13.35, 10.09,  7.59,  5.80,  4.53,  3.48], # 30 atm
+            [   -1, 25.11, 19.44, 15.11, 11.71,  9.17,  7.13,  5.58], # 50 atm
+            [   -1,    -1, 30.95, 24.91, 20.23, 16.35, 12.98, 10.40], # 100 atm
+            [   -1,    -1,    -1,    -1,    -1,  35.5,  31.0,  26.2], # 300 atm
+            [   -1,    -1,    -1,    -1,    -1,  53.6,  47.5,  42.1], # 600 atm
+            [   -1,    -1,    -1,    -1,    -1,  69.4,  63.5,    -1]  # 1000 atm
         ]
     )
     / 100
-)  # 100 atm
+)
 
 # xi über T bei unterschiedlichen p
 fig1, ax1 = plt.subplots(figsize=figsize)
 
-colors = ["rebeccapurple", "teal", "orange", "limegreen", "crimson"]
+colors = ["rebeccapurple", "teal", "orange", "limegreen", "crimson", "orangered", "magenta"]
 
 for i in range(0, len(p_plot1)):
     ax1.plot(
@@ -175,6 +178,27 @@ legend_handles = [
     Line2D(
         [0, 0],
         [0, 0],
+        color=colors[4],
+        lw=2,
+        label=f"$p$ = {p_plot1[4]/1.01325} atm",
+    ),
+    Line2D(
+        [0, 0],
+        [0, 0],
+        color=colors[5],
+        lw=2,
+        label=f"$p$ = {p_plot1[5]/1.01325} atm",
+    ),
+    Line2D(
+        [0, 0],
+        [0, 0],
+        color=colors[6],
+        lw=2,
+        label=f"$p$ = {p_plot1[6]/1.01325} atm",
+    ),
+    Line2D(
+        [0, 0],
+        [0, 0],
         linestyle="None",
         marker="+",
         color="k",
@@ -183,7 +207,7 @@ legend_handles = [
     ),
 ]
 
-leg1 = ax1.legend(handles=legend_handles, frameon=True)  # Legende anzeigen
+leg1 = ax1.legend(handles=legend_handles, frameon=True, bbox_to_anchor = (1,1), loc = "upper left")  # Legende anzeigen
 # leg1.get_frame().set_edgecolor("k")  # schwarzer Kasten um Legende
 # leg1.get_frame().set_linewidth(3)  # Linienstärke Kasten um Legende
 
