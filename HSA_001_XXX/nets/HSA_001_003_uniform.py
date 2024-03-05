@@ -225,14 +225,14 @@ class EqNet(pl.LightningModule):
 
 
 dm_uniform = DataModule(
-    path=Path.cwd() / "HSA_001_XXX" / "data" / "eq_dataset_uniform.npz",
+    path=Path.cwd() / "HSA_001_XXX" / "data" / "HSA_003_eq_dataset_uniform.npz",
     batch_size=256,
 )
 
 dm_uniform.prepare_data()
 
 dm_loguniform = DataModule(
-    path=Path.cwd() / "HSA_001_XXX" / "data" / "eq_dataset_loguniform.npz",
+    path=Path.cwd() / "HSA_001_XXX" / "data" / "HSA_003_eq_dataset_loguniform.npz",
     batch_size=256,
 )
 
