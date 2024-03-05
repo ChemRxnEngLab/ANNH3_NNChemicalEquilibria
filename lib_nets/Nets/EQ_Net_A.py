@@ -5,6 +5,29 @@ from typing import Optional
 
 class NeuralNetwork(nn.Module):
     # Initalisierung der Netzwerk layers
+
+    @classmethod
+    def default_config(cls) -> "NeuralNetwork":
+        inst = cls(
+            5,
+            200,
+            200,
+            200,
+            2,
+        )
+        return inst
+
+    def from_state_dict(cls, state_dict_file) -> "NeuralNetwork":
+        inst = cls(
+            5,
+            200,
+            200,
+            200,
+            2,
+        )
+        inst.load_state_dict(torch.load(state_dict_file))
+        return inst
+
     def __init__(
         self,
         input_size: int,
