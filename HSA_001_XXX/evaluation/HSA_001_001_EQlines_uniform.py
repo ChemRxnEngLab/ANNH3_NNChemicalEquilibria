@@ -162,4 +162,5 @@ ax1.add_artist(con)
 
 plt.tight_layout()
 # Anzeigen der Diagramme
+plt.savefig(Path.cwd() / "figures" / "HSA_001_001_EQlines_uniform.png", dpi=300)
 plt.show()

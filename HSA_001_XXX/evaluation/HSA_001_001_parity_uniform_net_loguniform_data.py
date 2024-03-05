@@ -29,11 +29,11 @@ pos_params = {
 torch.set_default_dtype(torch.float64)
 
 uniform_data_file = Path.cwd() / "HSA_001_XXX" / "data" / "eq_dataset_uniform.npz"
-loguniform_data_file = Path.cwd() / "HSA_001_XXX" / "data" / "eq_dataset_uniform.npz"
+loguniform_data_file = Path.cwd() / "HSA_001_XXX" / "data" / "eq_dataset_loguniform.npz"
 net_file = Path.cwd() / "models" / "torch" / "NH3_net_uniform.pt"
 
 # read in test data
-data = np.load(uniform_data_file)
+data = np.load(loguniform_data_file)
 T = torch.tensor(data["T"], dtype=torch.float64)[::1000]
 p = torch.tensor(data["p"], dtype=torch.float64)[::1000]
 x_0 = torch.tensor(data["x_0"], dtype=torch.float64)[::1000, :]
@@ -196,5 +196,5 @@ ax.add_patch(cp2)
 # fig.suptitle("Parity Plot")
 plt.tight_layout()
 
-plt.savefig(Path.cwd() / "figures" / "HSA_001_001_parity_uniform.png", dpi=300)
+plt.savefig("parity_uniform_net_loguniform_data.png", dpi=300)
 plt.show()
