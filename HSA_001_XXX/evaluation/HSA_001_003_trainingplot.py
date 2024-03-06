@@ -15,17 +15,11 @@ pos_params = {
     "ax_width": 5 * cm2inch,
 }
 
-uniform_loss = np.loadtxt(
-    "HSA_001_XXX\evaluation\HSA_001_001_uniform.csv",
+losses = np.loadtxt(
+    "HSA_001_XXX\evaluation\HSA_001_003.csv",
     delimiter=",",
     skiprows=(1),
-    usecols=(0, 4, 7),
-)
-loguniform_loss = np.loadtxt(
-    "HSA_001_XXX\evaluation\HSA_001_001_loguniform.csv",
-    delimiter=",",
-    skiprows=(1),
-    usecols=(0, 4, 7),
+    usecols=(0, 4, 7, 13, 16),
 )
 
 colors = [
@@ -40,27 +34,27 @@ fig = plt.figure(figsize=figsize)
 ax = make_square_ax(fig, **pos_params)
 
 ax.plot(
-    uniform_loss[::10, 0],
-    uniform_loss[::10, 1],
+    losses[::10, 0],
+    losses[::10, 1],
     label="",
     color=colors[0],
 )
 ax.plot(
-    uniform_loss[::10, 0],
-    uniform_loss[::10, 2],
+    losses[::10, 0],
+    losses[::10, 2],
     label="Validation",
     color=colors[0],
     linestyle="--",
 )
 ax.plot(
-    loguniform_loss[::10, 0],
-    loguniform_loss[::10, 1],
+    losses[::10, 0],
+    losses[::10, 3],
     label="",
     color=colors[3],
 )
 ax.plot(
-    loguniform_loss[::10, 0],
-    loguniform_loss[::10, 2],
+    losses[::10, 0],
+    losses[::10, 4],
     label="Validation",
     color=colors[3],
     linestyle="--",
@@ -81,6 +75,6 @@ legend_handles = [
 ]
 
 plt.legend(handles=legend_handles, frameon=True)
-plt.savefig("figures/training_001.png", dpi=300)
+plt.savefig("figures/training_003.png", dpi=300)
 
 plt.show()
