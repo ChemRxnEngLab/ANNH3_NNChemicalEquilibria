@@ -17,6 +17,7 @@ class NeuralNetwork(nn.Module):
         )
         return inst
 
+    @classmethod
     def from_state_dict(cls, state_dict_file) -> "NeuralNetwork":
         inst = cls(
             5,
