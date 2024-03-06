@@ -46,11 +46,11 @@ def main():
         v = t / n
         n_t = n_t - n
         print(f"\tit/s: {1/v:.3f}")
-        eta = 10 * n_t * v
+        eta = n_t * v
         print(f"\tETA: {eta:.2f}s")
         ts[i] = t
 
-    np.savez("HSA_001_XXX/timing/time_EQC.npz", ns=ns, ts=ts)
+    np.savez("C:/Users/TheresaKunz/Python/AG_Güttel_GIT/sr-03-23/HSA_001_XXX/timing/time_EQC.npz", ns=ns, ts=ts)
 
 
 if __name__ == "__main__":
