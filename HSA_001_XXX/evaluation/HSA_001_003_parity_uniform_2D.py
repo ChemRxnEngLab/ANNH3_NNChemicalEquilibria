@@ -107,6 +107,24 @@ ax.set(
 )
 cbar = fig.colorbar(pcm)
 cbar.set_label("MAE")
+### inset axes
+in_ax = ax.inset_axes(
+    [0.5, 0.5, 0.47, 0.47],
+    xlim=(1, 50),
+    ylim=(800, 1273.15),
+)
+ax.indicate_inset_zoom(in_ax, edgecolor="black")
+pcm_2 = in_ax.contourf(
+    pg,
+    Tg,
+    MAE,
+    locator=ticker.LogLocator(),
+    levels=np.logspace(-2, 1, 4),
+    cmap="Blues",
+    extend="both",
+)
+cl_2 = in_ax.contour(pcm_2, levels=np.array([0.1]), colors="k")
+in_ax.clabel(cl_2, cl_2.levels, inline=True, fontsize=10)
 
 ax.tick_params(direction="out")
 
