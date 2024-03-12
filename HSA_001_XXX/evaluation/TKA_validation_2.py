@@ -228,5 +228,5 @@ leg1 = ax1.legend(
 
 plt.tight_layout()
 # Anzeigen der Diagramme
-plt.savefig("val_001_Shomate_Larson.png", dpi=300, bbox_inches="tight")
+plt.savefig("figures/val_001_Shomate_Larson.png", dpi=300, bbox_inches="tight")
 plt.show()

@@ -33,7 +33,7 @@ pos_params = {
 torch.set_default_dtype(torch.float64)
 
 net_file = Path.cwd() / "models" / "torch" / "NH3_net_loguniform.pt"
-small_net_file = Path.cwd() / "models" / "torch" / "NH3_net_003_loguniform.pt"
+small_net_file = Path.cwd() / "models" / "torch" / "NH3_net_003_uniform.pt"
 
 # load model
 net = NeuralNetwork.from_state_dict(net_file)
@@ -233,7 +233,7 @@ legend_handles = [
         marker="o",
         color="k",
         fillstyle="none",
-        label="big NN pred. data",
+        label="LL net",
     ),
     Line2D(
         [0, 0],
@@ -242,7 +242,7 @@ legend_handles = [
         marker="s",
         color="k",
         fillstyle="none",
-        label="small NN pred. data",
+        label="SU net",
     ),
 ]
 
@@ -255,5 +255,6 @@ leg1 = ax1.legend(
 
 plt.tight_layout()
 # Anzeigen der Diagramme
-plt.savefig("val_001v003_w_shomate_w_Larson.png", dpi=300)
+plt.savefig("figures/val_001v003_w_shomate_w_Larson.svg")
+plt.savefig("figures/val_001v003_w_shomate_w_Larson.png", dpi=300)
 plt.show()
