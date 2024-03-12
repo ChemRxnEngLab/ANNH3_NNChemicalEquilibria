@@ -15,11 +15,18 @@ pos_params = {
     "ax_width": 5 * cm2inch,
 }
 
-losses = np.loadtxt(
-    "HSA_001_XXX\evaluation\HSA_001_003.csv",
+train_losses = np.loadtxt(
+    "HSA_001_XXX\evaluation\HSA_001_003_train.csv",
     delimiter=",",
     skiprows=(1),
     usecols=(0, 4, 7, 13, 16),
+)
+
+test_losses = np.loadtxt(
+    "HSA_001_XXX\evaluation\HSA_001_003_test.csv",
+    delimiter=",",
+    skiprows=(1),
+    usecols=(0, 1, 2),
 )
 
 colors = [
@@ -34,34 +41,53 @@ fig = plt.figure(figsize=figsize)
 ax = make_square_ax(fig, **pos_params)
 
 ax.plot(
-    losses[::10, 0],
-    losses[::10, 1],
+    train_losses[::10, 0],
+    train_losses[::10, 1],
     label="",
     color=colors[0],
 )
 ax.plot(
-    losses[::10, 0],
-    losses[::10, 2],
+    train_losses[::10, 0],
+    train_losses[::10, 2],
     label="Validation",
     color=colors[0],
     linestyle="--",
 )
 ax.plot(
-    losses[::10, 0],
-    losses[::10, 3],
+    train_losses[::10, 0],
+    train_losses[::10, 3],
     label="",
     color=colors[3],
 )
 ax.plot(
-    losses[::10, 0],
-    losses[::10, 4],
+    train_losses[::10, 0],
+    train_losses[::10, 4],
     label="Validation",
     color=colors[3],
     linestyle="--",
 )
 
+ax.plot(
+    test_losses[0],
+    test_losses[1],
+    "*",
+    label="",
+    color=colors[0],
+    markerfacecolor="none",
+    markersize=8,
+)
+ax.plot(
+    test_losses[0],
+    test_losses[2],
+    "*",
+    label="",
+    color=colors[3],
+    markerfacecolor="none",
+    markersize=8,
+)
+
 ax.set_xlabel("epoch")
-ax.set_ylabel("loss")
+ax.set_ylabel("MSE / 1")
 
 ax.set(
     yscale="log",
@@ -70,8 +96,18 @@ ax.set(
 legend_handles = [
     Line2D([0, 0], [0, 0], linestyle="-", color="k", label="training"),
     Line2D([0, 0], [0, 0], linestyle="--", color="k", label="validation"),
-    Line2D([0, 0], [0, 0], linestyle="-", color=colors[0], label="uniform"),
-    Line2D([0, 0], [0, 0], linestyle="-", color=colors[3], label="loguniform"),
+    Line2D(
+        [0, 0],
+        [0, 0],
+        linestyle="none",
+        marker="*",
+        color="k",
+        label="test",
+        markerfacecolor="none",
+        markersize=8,
+    ),
+    Line2D([0, 0], [0, 0], linestyle="-", color=colors[0], label="SU"),
+    Line2D([0, 0], [0, 0], linestyle="-", color=colors[3], label="SL"),
 ]
 
 plt.legend(handles=legend_handles, frameon=True)

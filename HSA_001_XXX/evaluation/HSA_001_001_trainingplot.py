@@ -28,6 +28,13 @@ loguniform_loss = np.loadtxt(
     usecols=(0, 4, 7),
 )
 
+test_losses = np.loadtxt(
+    "HSA_001_XXX\evaluation\HSA_001_001_test.csv",
+    delimiter=",",
+    skiprows=(1),
+    usecols=(0, 1, 2),
+)
+
 colors = [
     # "rebeccapurple",
     "teal",
@@ -66,8 +73,27 @@ ax.plot(
     linestyle="--",
 )
 
+ax.plot(
+    test_losses[0],
+    test_losses[1],
+    "*",
+    label="",
+    color=colors[0],
+    markerfacecolor="none",
+    markersize=8,
+)
+ax.plot(
+    test_losses[0],
+    test_losses[2],
+    "*",
+    label="",
+    color=colors[3],
+    markerfacecolor="none",
+    markersize=8,
+)
+
 ax.set_xlabel("epoch")
-ax.set_ylabel("loss")
+ax.set_ylabel("MSE / 1")
 
 ax.set(
     yscale="log",
@@ -76,8 +102,18 @@ ax.set(
 legend_handles = [
     Line2D([0, 0], [0, 0], linestyle="-", color="k", label="training"),
     Line2D([0, 0], [0, 0], linestyle="--", color="k", label="validation"),
-    Line2D([0, 0], [0, 0], linestyle="-", color=colors[0], label="uniform"),
-    Line2D([0, 0], [0, 0], linestyle="-", color=colors[3], label="loguniform"),
+    Line2D(
+        [0, 0],
+        [0, 0],
+        linestyle="none",
+        marker="*",
+        color="k",
+        label="test",
+        markerfacecolor="none",
+        markersize=8,
+    ),
+    Line2D([0, 0], [0, 0], linestyle="-", color=colors[0], label="LU"),
+    Line2D([0, 0], [0, 0], linestyle="-", color=colors[3], label="LL"),
 ]
 
 plt.legend(handles=legend_handles, frameon=True)
