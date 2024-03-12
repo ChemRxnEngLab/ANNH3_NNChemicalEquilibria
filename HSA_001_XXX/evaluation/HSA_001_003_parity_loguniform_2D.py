@@ -4,9 +4,9 @@ import numpy as np
 from pathlib import Path
 import matplotlib.pyplot as plt
 from scipy.stats import loguniform
-from matplotlib.patches import ConnectionPatch
+from matplotlib.patches import ConnectionPatch, Rectangle
 import sys
-from matplotlib import ticker, patches
+from matplotlib import ticker
 
 sys.path.append(str(Path.cwd() / "lib_nets"))
 print(sys.path)
@@ -54,7 +54,8 @@ Tg, pg = np.meshgrid(T, p)
 xg_N2 = np.empty_like(Tg)
 xg_H2 = np.empty_like(Tg)
 xg_NH3 = np.empty_like(Tg)
-xg_net = np.empty_like(Tg)
+xg_net_H2 = np.empty_like(Tg)
+xg_net_NH3 = np.empty_like(Tg)
 n_ges_0 = 1  # mol Gesamtstoffmenge Start
 x_0 = np.array([0.75, 0.25, 0])
 n_0 = n_ges_0 * x_0
@@ -69,20 +70,21 @@ for i in range(0, len(p)):
             n_eq / n_ges
         )  # 1 Stoffmengenanteile im Gleichgewicht
 
-        xg_net[i, j] = (
+        xg_net_H2[i, j], xg_net_NH3[i, j] = (
             net(torch.tensor([T[j], p[i], x_0[0], x_0[1], x_0[2]]))
             .squeeze()
             .detach()
             .numpy()
-        )[1]
+        )
 
-MAE = np.abs(xg_net - xg_NH3) / xg_NH3
+MAE_NH3 = np.abs(xg_net_NH3 - xg_NH3) / xg_NH3
+MAE_H2 = np.abs(xg_net_H2 - xg_H2) / xg_H2
 
 fig, ax = plt.subplots()
 pcm = ax.contourf(
     pg,
     Tg,
-    MAE,
+    MAE_NH3,
     locator=ticker.LogLocator(),
     levels=np.logspace(-2, 1, 4),
     cmap="Blues",
@@ -90,7 +92,7 @@ pcm = ax.contourf(
 )
 cl = ax.contour(pcm, levels=np.array([0.1]), colors="k")
 ax.clabel(cl, cl.levels, inline=True, fontsize=10)
-trained_range = patches.Rectangle(
+trained_range = Rectangle(
     (1, 408.15),
     99,
     1273.15 - 408.15,
@@ -106,7 +108,7 @@ ax.set(
     ylabel="T / K",
 )
 cbar = fig.colorbar(pcm)
-cbar.set_label("MAE")
+cbar.set_label("MRE / 1")
 
 ax.tick_params(direction="out")
 
@@ -120,17 +122,59 @@ ax.indicate_inset_zoom(in_ax, edgecolor="black")
 pcm_2 = in_ax.contourf(
     pg,
     Tg,
-    MAE,
+    MAE_NH3,
     locator=ticker.LogLocator(),
     levels=np.logspace(-2, 1, 4),
     cmap="Blues",
     extend="both",
 )
 cl_2 = in_ax.contour(pcm_2, levels=np.array([0.1]), colors="k")
-in_ax.clabel(cl_2, cl_2.levels, inline=True, fontsize=10)
 
+in_ax.clabel(cl_2, cl_2.levels, inline=True, fontsize=10)
+in_ax.tick_params(
+    direction="out",
+    colors="lightgray",
+)
 plt.grid()
 
-plt.savefig(Path.cwd() / "figures" / "HSA_001_003_parity_loguniform_2D.png", dpi=300)
+plt.savefig(
+    Path.cwd() / "figures" / "HSA_001_003_parity_loguniform_NH3_2D.png", dpi=300
+)
+
+### H2
+
+fig, ax = plt.subplots()
+pcm = ax.contourf(
+    pg,
+    Tg,
+    MAE_H2,
+    locator=ticker.LogLocator(),
+    levels=np.logspace(-2, 1, 4),
+    cmap="Blues",
+    extend="both",
+)
+cl = ax.contour(pcm, levels=np.array([0.1]), colors="k")
+ax.clabel(cl, cl.levels, inline=True, fontsize=10)
+trained_range = Rectangle(
+    (1, 408.15),
+    99,
+    1273.15 - 408.15,
+    linewidth=2,
+    linestyle="--",
+    edgecolor="k",
+    facecolor="none",
+)
+
+ax.add_patch(trained_range)
+ax.legend()
+ax.set(
+    xlabel="p / bar",
+    ylabel="T / K",
+)
+cbar = fig.colorbar(pcm)
+cbar.set_label("MRE / 1")
+
+ax.tick_params(direction="out")
+plt.savefig(Path.cwd() / "figures" / "HSA_001_003_parity_loguniform_H2_2D.png", dpi=300)
 plt.show()
 exit()
