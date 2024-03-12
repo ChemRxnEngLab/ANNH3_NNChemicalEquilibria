@@ -49,7 +49,7 @@ X = torch.stack((T, p, n_H2_0, n_N2_0, n_NH3_0), dim=1)
 ##load the network
 torch.set_default_dtype(torch.float64)
 
-net_file = Path.cwd() / "models" / "torch" / "NH3_net_uniform.pt"
+net_file = Path.cwd() / "models" / "torch" / "NH3_net_LU.pt"
 
 
 # load model

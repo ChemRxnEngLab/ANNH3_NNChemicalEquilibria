@@ -6,7 +6,7 @@ In diesem Projekt werden Ersatzmodelle für die physikalische Berechnung des Rea
 
 ![](./figures/TKA_SRA_GA_2.png)
 
-Alle Simulationen und Plots dieser Arbeit werden mit Python 3.10.9 umgesetzt und erstellt. In der Datei [bio-SR_03_23.txt](./bio-SR_03_23.txt) sind alle verwendeten Packages und ihre Versionen gelistet, sie kann zur Erstellung einer identischen Programmierumgebung genutzt werden.
+Alle Simulationen und Plots dieser Arbeit werden mit Python 3.10.9 umgesetzt und erstellt. In der Datei [requirements.txt](./requirements.txt) sind alle verwendeten Packages und ihre Versionen gelistet, sie kann zur Erstellung einer identischen Programmierumgebung genutzt werden.
 
 ## Benennug der Dateien
 Die folgende Tabelle gibt einen Überblick über die Nummerierung und Benennung der Dateien in diesem Projekt. X dient als Platzhalter für eine Ziffer. Genauere Informationen zu dem durchgeführten Experiment in der jeweiligen Datei sind den Excel-Datein im Ordner [Experimente](./Experimente) zu entnehmen.

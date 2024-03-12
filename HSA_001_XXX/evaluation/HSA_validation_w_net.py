@@ -32,8 +32,8 @@ pos_params = {
 
 torch.set_default_dtype(torch.float64)
 
-net_file = Path.cwd() / "models" / "torch" / "NH3_net_loguniform.pt"
-small_net_file = Path.cwd() / "models" / "torch" / "NH3_net_003_uniform.pt"
+net_file = Path.cwd() / "models" / "torch" / "NH3_net_LL.pt"
+small_net_file = Path.cwd() / "models" / "torch" / "NH3_net_SU.pt"
 
 # load model
 net = NeuralNetwork.from_state_dict(net_file)

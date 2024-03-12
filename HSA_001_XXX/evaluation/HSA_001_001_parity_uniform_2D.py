@@ -32,7 +32,7 @@ torch.set_default_dtype(torch.float64)
 
 uniform_data_file = Path.cwd() / "HSA_001_XXX" / "data" / "eq_dataset_loguniform.npz"
 loguniform_data_file = Path.cwd() / "HSA_001_XXX" / "data" / "eq_dataset_loguniform.npz"
-net_file = Path.cwd() / "models" / "torch" / "NH3_net_uniform.pt"
+net_file = Path.cwd() / "models" / "torch" / "NH3_net_LU.pt"
 
 # load model
 net = NeuralNetwork(

@@ -19,7 +19,7 @@ n_NH3_0 = x_0[:, 2] * n_ges_0  # mol amount NH3 at reaction start
 
 
 data_path = Path.cwd() / "HSA_001_XXX" / "data"
-data_file = data_path / "eq_dataset_uniform.npz"
+data_file = data_path / "HSA_001_eq_dataset_uniform.npz"
 
 if not data_path.exists():
     print(f"{data_path} does not exist. Create it!")

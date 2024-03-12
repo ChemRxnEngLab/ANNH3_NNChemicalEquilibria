@@ -22,47 +22,6 @@ wandb.login()
 torch.set_default_dtype(torch.float64)
 
 
-# class NeuralNetwork(nn.Module):
-#     # Initalisierung der Netzwerk layers
-#     def __init__(
-#         self,
-#         input_size: int,
-#         hidden1_size: int,
-#         hidden2_size: int,
-#         hidden3_size: int,
-#         output_size: int,
-#         mean_in: torch.Tensor,
-#         mean_out: torch.Tensor,
-#         std_in: torch.Tensor,
-#         std_out: torch.Tensor,
-#     ):
-#         super().__init__()  # Referenz zur Base Class (nn.Module)
-#         # Kaskade der Layer
-#         self.linear_afunc_stack = nn.Sequential(
-#             # nn.BatchNorm1d(input_size), # Normalisierung, damit Inputdaten gleiche Größenordnung haben
-#             nn.Linear(
-#                 input_size, hidden1_size
-#             ),  # Lineare Transformation mit gespeicherten weights und biases
-#             nn.GELU(),  # Nicht lineare Aktivierungsfunktion um komplexe nichtlineare Zusammenhänge abzubilden
-#             nn.Linear(hidden1_size, hidden2_size),
-#             nn.GELU(),
-#             nn.Linear(hidden2_size, hidden3_size),
-#             nn.GELU(),
-#             nn.Linear(hidden3_size, output_size),
-#         )
-#         self.mean_in = nn.Parameter(mean_in, requires_grad=False)
-#         self.std_in = nn.Parameter(std_in, requires_grad=False)
-#         self.mean_out = nn.Parameter(mean_out, requires_grad=False)
-#         self.std_out = nn.Parameter(std_out, requires_grad=False)
-
-#     # Implementierung der Operationen auf Input Daten
-#     def forward(self, x: torch.Tensor) -> torch.Tensor:
-#         x_t = (x - self.mean_in) / self.std_in
-#         out_t = self.linear_afunc_stack(x_t)
-#         out = out_t * self.std_out + self.mean_out
-#         return out
-
-
 class DataModule(pl.LightningDataModule):
     def __init__(self, path, batch_size=256):
         super().__init__()
@@ -224,12 +183,21 @@ class EqNet(pl.LightningModule):
         return ret_dict
 
 
-dm = DataModule(
-    path=Path.cwd() / "HSA_001_XXX" / "data" / "eq_dataset_uniform.npz",
+dm_uniform = DataModule(
+    path=Path.cwd() / "HSA_001_XXX" / "data" / "HSA_001_eq_dataset_uniform.npz",
     batch_size=256,
 )
 
-dm.prepare_data()
+dm_uniform.prepare_data()
+
+dm_loguniform = DataModule(
+    path=Path.cwd() / "HSA_001_XXX" / "data" / "HSA_001_eq_dataset_loguniform.npz",
+    batch_size=256,
+)
+
+dm_loguniform.prepare_data()
+
+dm = dm_uniform
 
 model = EqNet(
     5,
@@ -264,14 +232,17 @@ Trainer = pl.Trainer(
 )
 
 Trainer.fit(model, dm)
-Trainer.test(model, dm)
+print("Uniform Net on loguniform dataloader")
+Trainer.test(model, dm_loguniform)
+print("Uniform net on uniform dataloader")
+Trainer.test(model, dm_uniform)
 model.eval()
 
 wandb.finish()
 
 torch.save(
     model.net.state_dict(),
-    Path.cwd() / "models" / "torch" / "NH3_net_uniform.pt",
+    Path.cwd() / "models" / "torch" / "NH3_net_LU.pt",
 )
 
 # onnx_program = torch.onnx.dynamo_export(model.net, torch.rand((5,)))

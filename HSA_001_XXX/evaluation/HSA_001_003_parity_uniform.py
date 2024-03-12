@@ -34,7 +34,7 @@ uniform_data_file = (
 loguniform_data_file = (
     Path.cwd() / "HSA_001_XXX" / "data" / "HSA_003_eq_dataset_uniform.npz"
 )
-net_file = Path.cwd() / "models" / "torch" / "NH3_net_003_uniform.pt"
+net_file = Path.cwd() / "models" / "torch" / "NH3_net_SU.pt"
 
 # read in test data
 data = np.load(uniform_data_file)

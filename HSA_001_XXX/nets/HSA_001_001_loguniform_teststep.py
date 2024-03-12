@@ -224,7 +224,7 @@ class EqNet(pl.LightningModule):
 
 
 dm_uniform = DataModule(
-    path=Path.cwd() / "HSA_001_XXX" / "data" / "eq_dataset_uniform.npz",
+    path=Path.cwd() / "HSA_001_XXX" / "data" / "HSA_001_eq_dataset_uniform.npz",
     batch_size=256,
 )
 
@@ -250,7 +250,7 @@ model = EqNet(
     std_out=dm_loguniform.y_std,
 )
 
-net_file = Path.cwd() / "models" / "torch" / "NH3_net_loguniform.pt"
+net_file = Path.cwd() / "models" / "torch" / "NH3_net_LL.pt"
 model.net.load_state_dict(torch.load(net_file))
 
 

@@ -29,7 +29,7 @@ pos_params = {
 torch.set_default_dtype(torch.float64)
 
 data_file = Path.cwd() / "HSA_001_XXX" / "data" / "eq_dataset_loguniform.npz"
-net_file = Path.cwd() / "models" / "torch" / "NH3_net_loguniform.pt"
+net_file = Path.cwd() / "models" / "torch" / "NH3_net_LL.pt"
 
 # read in test data
 data = np.load(data_file)

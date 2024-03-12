@@ -31,7 +31,7 @@ pos_params = {
 
 # torch.set_default_dtype(torch.float64)
 #
-# net_file = Path.cwd() / "models" / "torch" / "BatchNorm_NH3_net_uniform_001.pt"
+# net_file = Path.cwd() / "models" / "torch" / "BatchNorm_NH3_net_LU_001.pt"
 
 # # load model
 # net = NeuralNetwork(

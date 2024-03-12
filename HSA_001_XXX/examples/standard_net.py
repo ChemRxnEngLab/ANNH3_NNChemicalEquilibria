@@ -1,4 +1,5 @@
 import sys
+from pathlib import Path
 
 sys.path.append(str(Path.cwd() / "lib_nets"))
 print(sys.path)
@@ -7,7 +8,7 @@ print(sys.path)
 from Nets.EQ_Net_A import NeuralNetwork
 
 model = NeuralNetwork.default_config()
-saved_model_file = "models\torch\NH3_net_loguniform.pt"
+saved_model_file = "models\torch\NH3_net_LL.pt"
 
 model.from_state_dict(saved_model_file)
 
