@@ -88,7 +88,15 @@ for i in range(0, len(p_plot1)):
 # xi über T bei unterschiedlichen p
 fig1, ax1 = plt.subplots(figsize=figsize)
 
-colors = ["rebeccapurple", "teal", "orange", "limegreen", "crimson"]
+colors = {
+    1: "rebeccapurple",
+    20: "teal",
+    100: "orange",
+    200: "limegreen",
+    500: "crimson",
+    700: "mediumvioletred",
+}
+
 
 for i in range(0, len(p_plot1)):
     ax1.plot(
@@ -96,13 +104,13 @@ for i in range(0, len(p_plot1)):
         x_plot1[:, i, 2],
         "-",
         label=f"$p$ = {p_plot1[i]} bar",
-        color=colors[i],
+        color=colors[p_plot1[i]],
     )
     ax1.plot(
         T_plot1,
         x_net_plot1[:, i, 1],
         "o",
-        color=colors[i],
+        color=colors[p_plot1[i]],
     )
 
 #'o': Punkte;'-': Verbindung mit Linien; '--':gestrichelte Linie...

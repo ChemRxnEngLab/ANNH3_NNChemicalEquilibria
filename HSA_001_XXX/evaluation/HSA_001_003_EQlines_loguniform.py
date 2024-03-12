@@ -58,7 +58,7 @@ n = n_ges_0_plot * x_0_plot
 
 # Diagramm1: Parameter zur Berechnung von xi über T bei versch. Druecken
 T_plot1 = np.linspace(300, 1300, num=num_plot)  # K Temperatur
-p_plot1 = np.array([1, 20, 50, 100, 200])  # bar Druck;
+p_plot1 = np.array([1, 20, 100, 200])  # bar Druck;
 
 # Aufrufen der Funktion zur Berechnung von xi mit Shomate
 K_x_plot1 = np.zeros((num_plot, len(p_plot1)))
@@ -88,7 +88,15 @@ for i in range(0, len(p_plot1)):
 # xi über T bei unterschiedlichen p
 fig1, ax1 = plt.subplots(figsize=figsize)
 
-colors = ["rebeccapurple", "teal", "orange", "limegreen", "crimson"]
+colors = {
+    1: "rebeccapurple",
+    20: "teal",
+    100: "orange",
+    200: "limegreen",
+    500: "crimson",
+    700: "mediumvioletred",
+}
+
 
 for i in range(0, len(p_plot1)):
     ax1.plot(
@@ -96,13 +104,13 @@ for i in range(0, len(p_plot1)):
         x_plot1[:, i, 2],
         "-",
         label=f"$p$ = {p_plot1[i]} bar",
-        color=colors[i],
+        color=colors[p_plot1[i]],
     )
     ax1.plot(
         T_plot1,
         x_net_plot1[:, i, 1],
         "o",
-        color=colors[i],
+        color=colors[p_plot1[i]],
     )
 
 #'o': Punkte;'-': Verbindung mit Linien; '--':gestrichelte Linie...
@@ -129,7 +137,7 @@ print(T_trained)
 fill = ax1.fill_between(
     T_trained,
     x_plot1[cond_idcs, 0, 2],
-    x_plot1[cond_idcs, 3, 2],
+    x_plot1[cond_idcs, 2, 2],
     color="lightgray",
     alpha=1,
     zorder=1,
