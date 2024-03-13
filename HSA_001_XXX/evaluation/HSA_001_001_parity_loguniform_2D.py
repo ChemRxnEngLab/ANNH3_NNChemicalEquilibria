@@ -16,7 +16,7 @@ from Nets.EQ_Net_A import NeuralNetwork
 from GGW_calc.GGW import GGW
 from ICIW_Plots import make_square_ax
 
-plt.style.use("ICIWstyle")
+("ICIWstyle")
 
 cm2inch = 1 / 2.54
 

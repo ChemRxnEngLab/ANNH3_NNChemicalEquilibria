@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from ICIW_Plots import make_square_ax
 from pathlib import Path
 
-plt.style.use("ICIWstyle")
+("ICIWstyle")
 
 base_path = Path.cwd() / "HSA_001_XXX" / "timing"
 

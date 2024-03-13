@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from ICIW_Plots import make_square_ax
 
-plt.style.use("ICIWstyle")
+("ICIWstyle")
 
 with np.load("HSA_001_XXX/timing/HSA_time_EQC.npz") as data:
     ns = data["ns"]
