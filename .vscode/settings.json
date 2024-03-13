@@ -1,8 +1,0 @@
-{
-    "python.analysis.typeCheckingMode": "basic",
-    "python.analysis.include": ["./lib_nets/*"],
-    "python.analysis.extraPaths": [
-        "${workspaceFolder}/lib_nets/"
-    ],
-    "python.terminal.executeInFileDir": false,
-}
