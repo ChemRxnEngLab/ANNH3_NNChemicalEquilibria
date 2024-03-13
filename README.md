@@ -1,7 +1,7 @@
 
-# Effiziente Berechnung des Reaktionsgleichgewichts mit KI-Methoden
+# Ammonia Cracking and Synthesis: Efficient Calculation of Chemical Equilibria by Artificial Neural Networks ANNH3
 
-## Beschreibung
+## Abstract
 Short Abstract
 
 ![](./figures/graph_abstr.png)
