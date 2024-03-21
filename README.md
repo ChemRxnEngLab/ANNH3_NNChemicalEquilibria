@@ -1,6 +1,10 @@
 
 # Ammonia Cracking and Synthesis: Efficient Calculation of Chemical Equilibria by Artificial Neural Networks ANNH3
 
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10846856.svg)](https://doi.org/10.5281/zenodo.10846856)  [Titel anhand dieser DOI in Citavi-Projekt übernehmen] 
+
+
 ## Abstract
 Short Abstract
 
